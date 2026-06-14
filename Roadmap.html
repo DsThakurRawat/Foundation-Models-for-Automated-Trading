@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An Implementation Roadmap — Event-Stream Foundation Models for Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3ede1;
+    --bg-elevated: #ebe3d2;
+    --ink: #1a1614;
+    --ink-soft: #4a423b;
+    --ink-muted: #76695e;
+    --rule: #c9bda8;
+    --accent: #1d4a4a;
+    --accent-soft: #2f6b6b;
+    --gold: #8a6a1d;
+    --teal: #7a1e1e;
+    --grain-bg: rgba(0,0,0,0.015);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Newsreader', Georgia, serif; font-size: 18px; line-height: 1.65;
+    background-image: radial-gradient(circle at 1px 1px, var(--grain-bg) 1px, transparent 0);
+    background-size: 4px 4px;
+  }
+  .page { max-width: 980px; margin: 0 auto; padding: 80px 56px 120px; }
+
+  .masthead { border-top: 4px double var(--ink); border-bottom: 1px solid var(--ink); padding: 24px 0 18px; margin-bottom: 56px; }
+  .masthead-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-muted); margin-bottom: 30px;
+  }
+  .masthead-top .dot { display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; margin: 0 8px; vertical-align: middle; }
+  h1.title {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: clamp(40px, 6vw, 64px); line-height: 1.02; letter-spacing: -0.02em;
+    margin: 0 0 18px; font-variation-settings: "opsz" 144, "SOFT" 50;
+  }
+  h1.title em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .subtitle { font-family: 'Newsreader', serif; font-style: italic; font-size: 22px; color: var(--ink-soft); margin: 0; max-width: 800px; }
+
+  .part-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold); margin: 90px 0 0; font-weight: 600;
+  }
+  h2 {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 32px; line-height: 1.15;
+    letter-spacing: -0.015em; margin: 10px 0 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule); font-variation-settings: "opsz" 60;
+  }
+  h2 .section-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;
+    letter-spacing: 0.15em; color: var(--accent); display: block; margin-bottom: 8px; text-transform: uppercase;
+  }
+  h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin: 38px 0 12px; color: var(--ink); }
+  h4 { font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; color: var(--accent); margin: 26px 0 10px; }
+
+  p { margin: 0 0 1em; }
+  .lede {
+    font-size: 21px; line-height: 1.55; color: var(--ink-soft); font-weight: 400;
+    margin-bottom: 32px; border-left: 3px solid var(--accent); padding-left: 20px; font-style: italic;
+  }
+
+  a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--accent-soft); transition: color 0.15s ease; }
+  a:hover { color: var(--ink); text-decoration-color: var(--ink); background: rgba(29,74,74,0.06); }
+  a.repo { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; text-decoration: none; border-bottom: 1px dotted var(--accent-soft); }
+  a.repo::before { content: "↗ "; opacity: 0.5; }
+  a.paper { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; text-decoration: none; color: var(--accent-soft); border-bottom: 1px dotted var(--accent-soft); }
+  a.xref { font-family: 'JetBrains Mono', monospace; font-size: 0.8em; color: var(--teal); text-decoration: none; border-bottom: 1px dotted var(--teal); white-space: nowrap; }
+  a.xref:hover { color: var(--ink); background: rgba(122,30,30,0.06); }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: var(--bg-elevated); padding: 2px 6px; border-radius: 2px; border: 1px solid var(--rule); color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 15.5px; }
+  thead tr { border-bottom: 2px solid var(--ink); }
+  th { text-align: left; padding: 11px 12px 9px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  td { padding: 12px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; line-height: 1.5; }
+  tbody tr:hover { background: var(--bg-elevated); }
+  td.name { font-weight: 600; color: var(--accent); }
+  td.type { font-family: 'JetBrains Mono', monospace; font-size: 0.8em; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+
+  ul, ol { padding-left: 24px; margin: 14px 0 22px; }
+  li { margin-bottom: 9px; line-height: 1.55; }
+  ul li::marker { color: var(--accent); }
+  ol li::marker { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  ul.check { list-style: none; padding-left: 4px; }
+  ul.check li { position: relative; padding-left: 30px; }
+  ul.check li::before { content: "▢"; position: absolute; left: 0; top: -1px; color: var(--accent); font-size: 1.1em; }
+
+  .callout { background: var(--bg-elevated); border-left: 4px solid var(--accent); padding: 18px 22px; margin: 28px 0; font-style: italic; color: var(--ink-soft); position: relative; }
+  .callout.warn { border-left-color: var(--teal); }
+  .callout.gate { border-left-color: var(--gold); background: #f0e9d6; }
+  .callout::before { content: "❡"; font-family: 'Fraunces', serif; font-size: 30px; color: var(--accent); position: absolute; top: 12px; right: 18px; font-style: normal; opacity: 0.35; }
+  .callout.warn::before { content: "⚠"; color: var(--teal); font-size: 22px; top: 16px; }
+  .callout.gate::before { content: "⊟"; color: var(--gold); font-size: 24px; top: 14px; }
+  .callout strong { color: var(--accent); font-style: normal; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; display: block; margin-bottom: 7px; }
+  .callout.warn strong { color: var(--teal); }
+  .callout.gate strong { color: var(--gold); }
+
+  .companion { background: var(--teal); color: var(--bg); padding: 18px 24px; margin: 0 0 40px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; border-radius: 2px; }
+  .companion .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.7; display: block; margin-bottom: 4px; }
+  .companion .desc { font-family: 'Newsreader', serif; font-size: 17px; }
+  .companion a { color: var(--bg); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.06em; white-space: nowrap; text-decoration: none; border: 1px solid rgba(243,237,225,0.5); padding: 10px 18px; border-radius: 2px; }
+  .companion a:hover { background: rgba(243,237,225,0.15); color: var(--bg); }
+
+  .toc { background: var(--bg-elevated); border: 1px solid var(--rule); padding: 28px 32px; margin: 0 0 48px; column-count: 2; column-gap: 40px; }
+  .toc-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-muted); margin-bottom: 14px; column-span: all; }
+  .toc ol { list-style: none; padding: 0; margin: 0; }
+  .toc li { margin-bottom: 6px; font-family: 'Newsreader', serif; font-size: 15px; break-inside: avoid; }
+  .toc .pt { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.1em; display: block; margin: 12px 0 4px; text-transform: uppercase; }
+  .toc a { text-decoration: none; color: var(--ink); }
+  .toc a:hover { color: var(--accent); background: transparent; }
+  .toc a::before { content: "§ "; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); }
+
+  .phases { counter-reset: phase -1; list-style: none; padding: 0; margin: 30px 0; }
+  .phases > li { counter-increment: phase; position: relative; padding: 28px 0 28px 72px; border-bottom: 1px solid var(--rule); }
+  .phases > li::before { content: "P" counter(phase); position: absolute; left: 0; top: 26px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 15px; color: var(--bg); background: var(--accent); width: 48px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 2px; letter-spacing: 0.04em; }
+  .phases h3 { margin: 0 0 6px; }
+  .phase-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.07em; color: var(--ink-muted); margin-bottom: 12px; text-transform: uppercase; }
+  .phase-meta b { color: var(--accent); font-weight: 600; }
+  .gate-row { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; margin-top: 12px; padding: 10px 14px; background: #f0e9d6; border: 1px solid var(--rule); border-radius: 2px; }
+  .gate-row b { color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
+
+  .ornament { text-align: center; color: var(--accent); font-size: 22px; margin: 48px 0; letter-spacing: 1em; font-family: 'Fraunces', serif; }
+  footer { margin-top: 110px; padding-top: 32px; border-top: 4px double var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+
+  @media (max-width: 720px) {
+    .page { padding: 40px 22px 80px; }
+    body { font-size: 16px; }
+    h1.title { font-size: 38px; }
+    h2 { font-size: 25px; }
+    h3 { font-size: 19px; }
+    .toc { column-count: 1; padding: 20px; }
+    .masthead-top { flex-direction: column; gap: 6px; }
+    table { font-size: 13px; }
+    th, td { padding: 9px 7px; }
+    .companion { flex-direction: column; align-items: flex-start; }
+    .phases > li { padding-left: 54px; }
+    .phases > li::before { width: 40px; font-size: 13px; }
+  }
+  @media print { body { background: white; } .page { padding: 20px; } h2 { page-break-after: avoid; } .phases > li, .callout { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="masthead-top">
+      <span>Build Volume <span class="dot"></span> 01 <span class="dot"></span> Comprehensive Edition</span>
+      <span>Event-Stream Microstructure Models</span>
+      <span>2026</span>
+    </div>
+    <h1 class="title">An Implementation<br><em>Roadmap</em></h1>
+    <p class="subtitle">From the HRT and TradeFM thesis — "the limit order book is a language" — to a plan a small team can actually execute. Every layer: data, tokenization, training, simulation, evaluation, trading, risk, failure modes, and the gates that tell you when to stop.</p>
+  </header>
+
+  <div class="companion">
+    <div>
+      <span class="label">Companion file</span>
+      <span class="desc">Section markers like <span style="font-family:'JetBrains Mono',monospace;">§08</span> point to the Reference catalogue.</span>
+    </div>
+    <a href="index.html">← Back to the Reference</a>
+  </div>
+
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <span class="pt">I · Orientation</span>
+      <li><a href="#thesis">The thesis &amp; what you're building</a></li>
+      <li><a href="#prereqs">Prerequisites, skills &amp; glossary</a></li>
+      <li><a href="#scoping">Scoping, three goals &amp; budget reality</a></li>
+      <li><a href="#landscape">Work done around this</a></li>
+      <li><a href="#stack">The open stack &amp; the four forks</a></li>
+      <span class="pt">II · The build, layer by layer</span>
+      <li><a href="#data">Data — sourcing, reconstruction, quality, leakage</a></li>
+      <li><a href="#tokenization">Tokenization — the crux</a></li>
+      <li><a href="#model">Model &amp; training</a></li>
+      <li><a href="#simulation">Simulation &amp; the matching engine</a></li>
+      <li><a href="#evaluation">Evaluation — the five layers</a></li>
+      <li><a href="#trading">From model to trading</a></li>
+      <span class="pt">III · Doing it safely</span>
+      <li><a href="#validation">Validation discipline</a></li>
+      <li><a href="#risk">The risk register</a></li>
+      <li><a href="#failure">The failure-mode catalogue</a></li>
+      <li><a href="#mlops">Engineering &amp; MLOps</a></li>
+      <span class="pt">IV · Sequencing</span>
+      <li><a href="#plan">The phased plan &amp; go/no-go gates</a></li>
+      <li><a href="#schedule">A concrete schedule</a></li>
+      <li><a href="#map">Resource map to the Reference</a></li>
+    </ol>
+  </nav>
+
+  <p class="lede">There are three things people call "foundation models for trading," and only one is the subject here. Not TSFMs on price bars (<a class="xref" href="index.html#tsfm">Ref §04</a>), not LLMs on filings (<a class="xref" href="index.html#fin-llms">Ref §05</a>) — but transformers trained on the raw <em>event stream</em>: every order placement, cancellation, and fill, tokenized and modelled the way an LLM models text. This is what HRT presented at ICML 2025 and what TradeFM made concrete in the open. What follows is the whole build, not a summary of it.</p>
+
+  <!-- ===================== PART I ===================== -->
+  <div class="part-label">Part I · Orientation</div>
+
+  <h2 id="thesis"><span class="section-num">§ 1</span>The thesis &amp; what you're building</h2>
+  <p>Strip the branding and the bet is simple: <strong>model the market as a sequence of events and pretrain a transformer on it like a language model.</strong> Three claims follow, each with outside corroboration:</p>
+  <ul>
+    <li><strong>Tokenize the order flow.</strong> Each add, cancel, or fill becomes a token. HRT names two bundling schemes — fixed time-windows or fixed event-counts — each with cost/performance tradeoffs.</li>
+    <li><strong>Scaling laws hold.</strong> More data and bigger models keep improving the model, the same curve seen in LLMs. TradeFM independently confirms data-scaling holds for microstructure.</li>
+    <li><strong>The structure is universal.</strong> TradeFM generalizes zero-shot from US equities to APAC markets — the "physics" of order books is consistent enough that one pretrained model transfers.</li>
+  </ul>
+  <p>The honest limitation, stated by TradeFM itself: the model is <em>partially observant</em> — it never sees hidden intent — and turning it into a trader needs RL fine-tuning so it <em>optimizes</em> rather than merely <em>mimics</em>. Hold that in mind through every phase: a perfect mimic of the past is not a profitable agent in the future.</p>
+
+  <h2 id="prereqs"><span class="section-num">§ 2</span>Prerequisites, skills &amp; glossary</h2>
+  <p>Be honest about which of these you have before starting; the gaps tell you where Phase 0 reading goes.</p>
+  <ul class="check">
+    <li><strong>Deep learning.</strong> Transformers from scratch, autoregressive training, mixed precision, distributed training basics. JAX <em>or</em> PyTorch fluency (the open stack is JAX-heavy).</li>
+    <li><strong>Market microstructure.</strong> What a limit order book is, order types, price-time priority, the difference between a quote and a trade. Larry Harris's <em>Trading and Exchanges</em> covers this (<a class="xref" href="index.html#books">Ref §14</a>).</li>
+    <li><strong>Data / streaming systems.</strong> Websockets, message ordering, idempotent ingestion, columnar storage. <em>This is the part where your background is the edge, not a gap.</em></li>
+    <li><strong>Statistics for finance.</strong> Stylized facts, heavy tails, stationarity, why naive cross-validation leaks in time series.</li>
+    <li><strong>Reinforcement learning</strong> (only if targeting trading): policy gradients, reward shaping, sim-to-real.</li>
+  </ul>
+  <h4>Glossary — terms used throughout</h4>
+  <table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="name">LOB</td><td>Limit order book — the live list of resting buy/sell orders at each price.</td></tr>
+      <tr><td class="name">L1 / L2 / L3</td><td>Best bid/ask only / aggregated depth per price level / every individual order with IDs.</td></tr>
+      <tr><td class="name">MBO vs MBP</td><td>Market-by-order (every message, full granularity) vs market-by-price (aggregated levels, e.g. MBP-10).</td></tr>
+      <tr><td class="name">Message / event</td><td>An atomic action: add, cancel, modify, execute. The "token" of this whole field.</td></tr>
+      <tr><td class="name">Microprice</td><td>Imbalance-weighted mid-price; a better short-horizon fair-value estimate than the simple mid.</td></tr>
+      <tr><td class="name">OFI</td><td>Order-flow imbalance — net pressure from book changes; a classic predictive feature.</td></tr>
+      <tr><td class="name">Queue position</td><td>Where your resting order sits in the FIFO line at a price; decides whether you get filled.</td></tr>
+      <tr><td class="name">Stylized facts</td><td>Universal statistical signatures of real markets: heavy tails, volatility clustering, no return autocorrelation.</td></tr>
+      <tr><td class="name">Adverse selection</td><td>Getting filled precisely when the market is about to move against you — the market-maker's core risk.</td></tr>
+      <tr><td class="name">Implementation shortfall</td><td>The gap between the price you decided to trade at and the price you actually achieved; the standard execution objective.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="scoping"><span class="section-num">§ 3</span>Scoping, three goals &amp; budget reality</h2>
+  <p>HRT did ~$12.3B in 2025 net trading revenue and runs a datacenter so large its GPU orders reportedly affected regional supply. You are not reproducing that. Their scale ladder, for calibration: <strong>DeepLOB ~60K params → LOBS5 ~6.3M → TradeFM ~500M → HRT "trillions of tokens."</strong> A solo build lives at the LOBS5-to-small-TradeFM end — that is enough to prove every idea.</p>
+  <p>Pick which of these you're building before Phase 0, because it changes the later phases:</p>
+  <table>
+    <thead><tr><th>Goal</th><th>Optimizes for</th><th>Ends at</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Learning / portfolio</td><td>Understanding + a credible public artifact</td><td>Phase 5 — a model that passes LOB-Bench, written up.</td></tr>
+      <tr><td class="name">Open-source simulator</td><td>A reusable high-fidelity market simulator</td><td>Phases 2–5, polished and released. The most defensible solo outcome.</td></tr>
+      <tr><td class="name">Real trading attempt</td><td>A deployable policy</td><td>Phases 6–7 — and aim at <em>execution</em>, not directional alpha.</td></tr>
+    </tbody>
+  </table>
+  <h4>Budget &amp; hardware, concretely</h4>
+  <ul>
+    <li><strong>Phases 0–1:</strong> free. Colab / one consumer GPU is enough for FI-2010 baselines and LOBS5-scale experiments.</li>
+    <li><strong>Phase 2 (data):</strong> near-free for crypto; storage is the cost — budget for terabytes if you collect full depth on several venues for months.</li>
+    <li><strong>Phase 4 (pretrain):</strong> the real spend. A ~10–50M-param model on billions of tokens is single- to few-GPU and rentable for low hundreds of dollars per run; a ~500M TradeFM-scale model is multi-GPU and runs into the thousands. <em>Rent A100/H100 by the hour, use spot/preemptible instances, and never buy hardware for this.</em></li>
+  </ul>
+  <div class="callout">
+    <strong>Reframe — the durable deliverable</strong>
+    A directional predictor decays; TLOB measured LOB predictability falling year over year. A market <em>simulator</em> does not: TradeFM's own pitch is synthetic data, stress testing, and training RL agents. For a solo builder the durable artifact is the simulator, not a money printer. Optimize for that and the trading option stays open without being the thing you bet the project on.
+  </div>
+
+  <h2 id="landscape"><span class="section-num">§ 4</span>Work done around this</h2>
+  <p>The field splits into a classical supervised lineage and the new generative event-stream lineage. The Reference catalogues both in <a class="xref" href="index.html#microstructure">§08</a>; here is what each contributes.</p>
+  <h3>The supervised lineage — your baselines to beat</h3>
+  <table>
+    <thead><tr><th>Work</th><th>What it gives you</th></tr></thead>
+    <tbody>
+      <tr><td class="name">DeepLOB (2018)</td><td>CNN-LSTM origin (~60K params). The number every paper reports on FI-2010. Reproduce first.</td></tr>
+      <tr><td class="name">TransLOB / LiT (2020–2025)</td><td>Transformer and patch-based takes on the same task; LiT adds robustness to distribution shift.</td></tr>
+      <tr><td class="name">TLOB (2025)</td><td>Dual-attention SOTA — but its real gift is the warning that LOB predictability is declining over time and only matters net of costs.</td></tr>
+    </tbody>
+  </table>
+  <h3>The generative lineage — the actual target</h3>
+  <table>
+    <thead><tr><th>Work</th><th>Role in your build</th></tr></thead>
+    <tbody>
+      <tr><td class="name">HRT @ ICML 2025</td><td>The thesis statement. Not reproducible (proprietary, ~100 TB, own datacenter) but the clearest articulation. <a class="paper" href="https://slideslive.com/39043823/foundation-models-for-automated-trading" target="_blank">talk</a> · <a href="https://www.ai-street.co/p/hrt-trains-ai-models-on-trading-data" target="_blank">writeup</a></td></tr>
+      <tr><td class="name">TradeFM (JPMorgan, ICLR 2026)</td><td>The blueprint: decoder-only, 524M params, scale-invariant universal tokenizer, billions of trade events. No code — copy the design. <a class="paper" href="https://openreview.net/forum?id=ODdcZz7VnY" target="_blank">OpenReview</a></td></tr>
+      <tr><td class="name">LOBS5 (2023)</td><td><strong>The cornerstone you clone.</strong> First end-to-end generative model of tokenized LOB messages; S5 backbone; ~6.3M params. <a class="repo" href="https://github.com/peernagy/LOBS5" target="_blank">peernagy/LOBS5</a></td></tr>
+      <tr><td class="name">JAX-LOB (2023)</td><td>GPU matching engine that decodes generated messages and hosts RL. <a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">KangOxford/jax-lob</a></td></tr>
+      <tr><td class="name">LOB-Bench (2025)</td><td>The honest scoreboard — Wasserstein on interarrival times, depths, imbalance, spreads, returns. <a class="paper" href="https://arxiv.org/abs/2502.09172" target="_blank">arXiv:2502.09172</a></td></tr>
+      <tr><td class="name">AlphaTrade</td><td>RL execution on JAX-LOB — the bridge to a policy. <a class="repo" href="https://github.com/KangOxford/AlphaTrade" target="_blank">KangOxford/AlphaTrade</a></td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The connection worth noticing</strong>
+    TradeFM and the JPMorgan LLM equity-rating paper in <a class="xref" href="index.html#foundational">Ref §01</a> share authors (Veloso, Papasotiriou). The open generative lineage — LOBS5, JAX-LOB, AlphaTrade, LOB-Bench — all comes from one Oxford group (Foerster / Zohren). It is a small, reachable set of people whose code and papers interlock.
+  </div>
+
+  <h2 id="stack"><span class="section-num">§ 5</span>The open stack &amp; the four forks</h2>
+  <p>Everything below is open and runnable today; the phased plan just sequences it.</p>
+  <table>
+    <thead><tr><th>Layer</th><th>Tool</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Data (free)</td><td><a class="repo" href="https://github.com/bmoscon/cryptofeed" target="_blank">cryptofeed</a> + <a class="repo" href="https://github.com/ccxt/ccxt" target="_blank">ccxt</a></td><td>Full-depth L2/L3 crypto books, 24/7, free. Your "100 TB" substitute.</td></tr>
+      <tr><td class="name">Data (paid)</td><td><a href="https://lobsterdata.com/" target="_blank">LOBSTER</a> · <a href="https://databento.com/" target="_blank">databento</a></td><td>Real equity messages — LOBSTER to match LOBS5 exactly, databento for affordable full-depth MBO.</td></tr>
+      <tr><td class="name">Model</td><td><a class="repo" href="https://github.com/peernagy/LOBS5" target="_blank">LOBS5</a> · <a class="repo" href="https://github.com/state-spaces/s5" target="_blank">S5</a></td><td>Start from LOBS5; S5 for long sequences or a decoder-only transformer for the TradeFM path.</td></tr>
+      <tr><td class="name">Simulator</td><td><a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">JAX-LOB</a></td><td>Decodes generated messages into book states; harness for stylized-fact checks and RL.</td></tr>
+      <tr><td class="name">Trading</td><td><a class="repo" href="https://github.com/KangOxford/AlphaTrade" target="_blank">AlphaTrade</a> · <a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL" target="_blank">FinRL</a></td><td>RL execution on the simulator (<a class="xref" href="index.html#rl">Ref §07</a>).</td></tr>
+      <tr><td class="name">Storage</td><td><a class="repo" href="https://github.com/pola-rs/polars" target="_blank">Polars</a> · <a href="https://questdb.io/" target="_blank">QuestDB</a> · ClickHouse</td><td>Billions of events need columnar storage and disciplined schemas.</td></tr>
+    </tbody>
+  </table>
+  <h4>The four decisions that dominate the outcome</h4>
+  <table>
+    <thead><tr><th>Decision</th><th>Option A</th><th>Option B</th><th>Lean</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Tokenizer</td><td>Digit-level (LOBS5)</td><td>Feature-binning (TradeFM)</td><td>B for cross-asset transfer; A is simpler to start.</td></tr>
+      <tr><td class="name">Architecture</td><td>S5 / SSM (long context, cheap)</td><td>Decoder-only attention (TradeFM)</td><td>Run both — "SSM vs attention for market sequences" is itself worth answering.</td></tr>
+      <tr><td class="name">Data</td><td>Crypto full-LOB (free, adversarial)</td><td>Equity trade-flow (cleaner, paid)</td><td>Crypto to start; TradeFM proves trade-flow-only works for the equity path.</td></tr>
+      <tr><td class="name">Goal</td><td>Simulator / portfolio</td><td>Trading policy</td><td>Simulator first; keeps trading optional.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ===================== PART II ===================== -->
+  <div class="part-label">Part II · The build, layer by layer</div>
+
+  <h2 id="data"><span class="section-num">§ 6</span>Data — sourcing, reconstruction, quality, leakage</h2>
+  <p>This is 30–40% of the project and where most builds silently fail. A normalization leak or an undetected gap corrupts everything downstream and produces results that look great and mean nothing.</p>
+  <h4>Sources compared</h4>
+  <table>
+    <thead><tr><th>Source</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Crypto exchange websockets (via cryptofeed)</td><td class="type">Free · L2/L3</td><td>Full depth, 24/7, no licensing barrier. Per-exchange quirks; you reconstruct the book yourself.</td></tr>
+      <tr><td class="name">LOBSTER</td><td class="type">Paid · MBO</td><td>NASDAQ message data; the exact format LOBS5 expects. Academic licensing.</td></tr>
+      <tr><td class="name">databento</td><td class="type">Paid · MBO/MBP</td><td>Affordable full-depth US equity/futures; cleanest path to real equity LOB.</td></tr>
+      <tr><td class="name">Tardis.dev / CoinAPI</td><td class="type">Paid · crypto</td><td>Pre-collected historical crypto books if you don't want to run a collector for months.</td></tr>
+      <tr><td class="name">Polygon / Alpaca</td><td class="type">Freemium</td><td>Good for bars and trades; limited true depth.</td></tr>
+    </tbody>
+  </table>
+  <h4>Choose your granularity first</h4>
+  <p>MBO (every individual order, with IDs) preserves queue position and is what the generative models want; MBP-10 (aggregated top-10 levels) is smaller and enough for many supervised tasks; L1 is too coarse for this work. Decide up front — it dictates storage volume and tokenizer design.</p>
+  <h4>Order-book reconstruction (the part people underestimate)</h4>
+  <ul>
+    <li>Most feeds give a <strong>snapshot + incremental deltas</strong>. You apply deltas in sequence-number order to maintain a live book.</li>
+    <li><strong>Track sequence numbers</strong> and detect gaps; on a gap, discard and re-snapshot — never silently interpolate.</li>
+    <li><strong>Validate with the exchange checksum</strong> where provided (OKX, Kraken, others publish a periodic book checksum); a mismatch means your book has drifted and that segment is poison.</li>
+    <li>Handle reconnection, rate limits, and the snapshot/delta race (buffer deltas until the snapshot arrives, then replay).</li>
+  </ul>
+  <h4>Data quality &amp; cleaning</h4>
+  <ul>
+    <li><strong>Timestamps:</strong> prefer exchange time over local receive time; record both; expect out-of-order arrivals.</li>
+    <li><strong>Gaps, halts, auctions:</strong> mark them explicitly — never let a halt look like a quiet market.</li>
+    <li><strong>Equities only:</strong> adjust for splits/dividends and handle the opening/closing auction as a distinct regime.</li>
+    <li><strong>Crypto only:</strong> filter exchange outages, obvious wash/spoof bursts, and depeg/flash-crash artifacts unless you specifically want them.</li>
+  </ul>
+  <h4>Storage architecture &amp; volume math</h4>
+  <p>Three tiers: <strong>raw capture</strong> (append-only, immutable, exactly as received) → <strong>normalized event store</strong> (one schema across venues, Parquet/Arrow in Polars or QuestDB/ClickHouse) → <strong>training shards</strong> (tokenized, fixed-length, ready for the loader). A single active crypto pair can emit millions of events per day; full depth across several venues is multi-GB/day, terabytes over months. Compress aggressively and keep the raw tier append-only so you can always re-derive.</p>
+  <div class="callout warn">
+    <strong>Leakage is the silent killer</strong>
+    Split strictly by time, never randomly. Fit every normalization statistic (means, bins, scalers) on the training window <em>only</em>, then apply forward — fitting a scaler on the full set leaks the future into the past. Insert an <strong>embargo / purge</strong> gap between train and test so a long event sequence can't straddle the boundary. If your backtest looks too good, suspect leakage before you suspect genius.
+  </div>
+  <h4>Versioning &amp; legal</h4>
+  <p>Hash and version datasets (DVC or content hashes) so a result is reproducible months later. Check redistribution terms: LOBSTER is academic-licensed, exchange data has ToS, and you generally cannot republish raw vendor data — you can usually publish derived statistics and trained weights.</p>
+
+  <h2 id="tokenization"><span class="section-num">§ 7</span>Tokenization — the crux</h2>
+  <p>This is the single highest-leverage decision in the whole project. You are turning an irregular, multi-modal, heterogeneous event stream into a discrete sequence a transformer can model. Get it wrong and no amount of model scale recovers.</p>
+  <h4>The three schemes</h4>
+  <ul>
+    <li><strong>Digit-level (LOBS5).</strong> Tokenize the actual numbers — price and size — digit-group by digit-group, like LLM number tokenization. Simple, reversible, but long sequences and weak cross-asset transfer.</li>
+    <li><strong>Feature-binning (TradeFM).</strong> Map each event to a small vector of discretized indicators, e.g. <code>[liquidity, participant, &Delta;price-bin, trade-bin]</code>. This is what buys scale-invariance and zero-shot transfer across assets. More design work; the winning approach for a universal model.</li>
+    <li><strong>Structured-message.</strong> Treat each message as a typed record (event-type + fields) with sub-tokens. A middle ground; closest to how the book actually updates.</li>
+  </ul>
+  <h4>Time representation</h4>
+  <p>Markets are not evenly sampled, so you must encode time. Three options, all worth ablating: <strong>fixed time-windows</strong> (one token per Δt — HRT scheme A), <strong>fixed event-counts</strong> (one token per N events — HRT scheme B), or an explicit <strong>Δt token / time embedding</strong> alongside each event. The choice changes what "context length" even means.</p>
+  <h4>Scale-invariance — the hard requirement</h4>
+  <p>BTC at $60,000 and a $5 stock must share one vocabulary or the model can't transfer. The fixes: encode <em>relative</em> price changes (basis points, not dollars), tick-normalize, and log-bin sizes. TradeFM's universal tokenizer is essentially this discipline made systematic.</p>
+  <h4>Vocabulary, special tokens, sequence length, reversibility</h4>
+  <ul>
+    <li>Size the vocabulary deliberately — too small loses information, too large starves rare tokens.</li>
+    <li>Add special tokens: sequence start/end, level boundaries, day/session boundaries.</li>
+    <li>Pick a context length that captures real dependencies without blowing up compute — this is exactly why LOBS5 uses S5 for long sequences.</li>
+    <li><strong>Reversibility is mandatory for simulation:</strong> a generated token sequence must decode into a <em>valid</em> book update the matching engine can apply. Test this before training anything large.</li>
+  </ul>
+  <div class="callout"><strong>Ablation protocol</strong>Build at least the digit-level and feature-binning tokenizers, hold the model fixed, and compare vocabulary size, sequence length, perplexity, and downstream LOB-Bench fidelity. This comparison is itself a publishable mini-result.</div>
+
+  <h2 id="model"><span class="section-num">§ 8</span>Model &amp; training</h2>
+  <h4>Architecture</h4>
+  <p>Decoder-only transformer (TradeFM, HRT) is the default for generation. <strong>S5 / structured state-space</strong> (LOBS5) handles very long event sequences far more cheaply — strongly consider it given how long tokenized order flow gets; Mamba is a newer SSM alternative. Use time-aware positional encoding (rotary or an explicit time embedding) since position ≠ time here. Consider multi-task output heads — next-event plus an auxiliary price-direction or size head — which can stabilize and sharpen representations.</p>
+  <h4>Training</h4>
+  <ul>
+    <li><strong>Objective:</strong> autoregressive next-token. Mix data across assets and regimes so the model learns universal structure, not one symbol's quirks.</li>
+    <li><strong>Sizing &amp; the scale ladder:</strong> start at ~10–50M params (already past LOBS5, far below TradeFM). Prove the loop, then run a <strong>3-point size ladder</strong> and verify your loss bends like a scaling law before spending on a big run.</li>
+    <li><strong>Distributed:</strong> data-parallel first; FSDP / ZeRO or JAX sharding when the model outgrows one GPU.</li>
+    <li><strong>Hygiene:</strong> LR warmup + cosine decay, gradient clipping, mixed precision with NaN guards, frequent checkpointing with clean resume, and full experiment tracking (W&amp;B / MLflow). Log perplexity and divergence continuously.</li>
+  </ul>
+
+  <h2 id="simulation"><span class="section-num">§ 9</span>Simulation &amp; the matching engine</h2>
+  <p>The simulator decodes generated messages into book states and is also where RL lives. Reuse <a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">JAX-LOB</a> rather than writing your own unless engineering the engine <em>is</em> your goal.</p>
+  <ul>
+    <li><strong>Closed loop:</strong> model proposes a message → engine applies it → updated state feeds back as context. This loop is where error accumulation appears (see §14).</li>
+    <li><strong>Mechanics that matter:</strong> price-time priority, partial fills, queue position, and — if you ever go live — latency and your own market impact.</li>
+    <li><strong>Unit-test the engine.</strong> It is the one component where a subtle bug silently fabricates profit. Test matching, cancels, and partial fills against hand-worked examples.</li>
+  </ul>
+  <div class="callout warn"><strong>Simulators lie in known ways</strong>JAX-LOB makes simplifying choices (e.g. interpreting some large messages as an execution plus a new limit order). Know your engine's assumptions before trusting any result that depends on them — a "profitable" policy can be an artifact of the simulator, not the market.</div>
+
+  <h2 id="evaluation"><span class="section-num">§ 10</span>Evaluation — the five layers</h2>
+  <p>A model can pass one layer and fail the next. Climb them in order; do not skip ahead to PnL.</p>
+  <ol>
+    <li id="phase5anchor"><strong>Intrinsic.</strong> Perplexity and next-token accuracy. Necessary, not sufficient — a low-perplexity model can still generate unrealistic markets.</li>
+    <li><strong>Distributional fidelity / stylized facts.</strong> Roll out generations and check heavy tails, volatility clustering, absence of return autocorrelation, and intraday seasonality. Score on <strong>LOB-Bench</strong> (Wasserstein distance on interarrival times, depths, imbalance, spreads, returns). This is the real bar for a simulator.</li>
+    <li><strong>Simulation realism.</strong> Rollout stability over long horizons and correct market-impact response curves. A model whose simulated market diverges into nonsense fails here even with good perplexity.</li>
+    <li><strong>Predictive skill.</strong> Only now compare against the Phase-1 DeepLOB/TLOB baselines, on held-out <em>and</em> out-of-distribution data (a different time period, a different venue, an unseen asset).</li>
+    <li><strong>Economic value (trading only).</strong> Cost-adjusted PnL, Sharpe, drawdown — and trust the deflated versions (§12), never the raw backtest.</li>
+  </ol>
+
+  <h2 id="trading"><span class="section-num">§ 11</span>From model to trading</h2>
+  <p>Optional, and only after Layers 1–4 pass. For a solo build, <strong>aim at execution, not directional alpha</strong> — execution is more tractable, less adversarial, and the place a microstructure model has a real edge.</p>
+  <ul>
+    <li><strong>Setup:</strong> wrap the model as a policy on JAX-LOB via AlphaTrade; or use FinRL for a higher-level harness (<a class="xref" href="index.html#rl">Ref §07</a>).</li>
+    <li><strong>Reward design:</strong> implementation shortfall minus an inventory-risk penalty for execution; be very careful that the reward can't be gamed by a simulator quirk.</li>
+    <li><strong>The two ceilings:</strong> the <em>sim-to-real gap</em> (a policy tuned on a simulator overfits its assumptions) and <em>partial observability</em> (you never see hidden intent). Both cap how far this goes; respect them.</li>
+  </ul>
+
+  <!-- ===================== PART III ===================== -->
+  <div class="part-label">Part III · Doing it safely</div>
+
+  <h2 id="validation"><span class="section-num">§ 12</span>Validation discipline</h2>
+  <p>The literature is a graveyard of impressive backtests that were artifacts. These practices are what separate a real result from a curve fit.</p>
+  <ul>
+    <li><strong>Walk-forward only.</strong> Train on the past, test on the strictly-later future, roll forward. Never shuffle time.</li>
+    <li><strong>Combinatorial purged cross-validation</strong> with embargo (López de Prado) so overlapping samples can't leak across the train/test boundary.</li>
+    <li><strong>Model costs explicitly:</strong> commissions, spread, slippage, and your own market impact. Most "alpha" dies here.</li>
+    <li><strong>Deflated Sharpe ratio</strong> and <strong>probability of backtest overfitting (PBO)</strong> to correct for the many strategies you implicitly tried.</li>
+    <li><strong>Regime &amp; stress testing:</strong> evaluate separately across calm, volatile, trending, and crisis periods — an average that hides a blow-up is worse than useless.</li>
+  </ul>
+
+  <h2 id="risk"><span class="section-num">§ 13</span>The risk register</h2>
+  <p>Not just market risk. For anything touching real capital, work this whole table before you size a single position.</p>
+  <table>
+    <thead><tr><th>Risk</th><th>Type</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Drawdown / position blow-up</td><td class="type">Market</td><td>Hard position limits, max-drawdown kill switch, VaR/ES monitoring, small initial sizing.</td></tr>
+      <tr><td class="name">Model decay / drift</td><td class="type">Model</td><td>Monitor live-vs-train distribution shift; set a retraining cadence; define a fallback (flat) when confidence drops.</td></tr>
+      <tr><td class="name">Bad fill / fat-finger / runaway loop</td><td class="type">Operational</td><td>Pre-trade sanity checks, rate limits, a global kill switch, and end-of-day position reconciliation.</td></tr>
+      <tr><td class="name">Adverse selection / toxic flow</td><td class="type">Adversarial</td><td>You trade against HRT et al.; assume you're the slow one. Track fill-quality and back off when adversely selected.</td></tr>
+      <tr><td class="name">Spoofing / wash-trade rules</td><td class="type">Regulatory</td><td>Know the rules of each venue; never place orders you don't intend to honor; log everything for audit.</td></tr>
+      <tr><td class="name">Exchange counterparty / custody</td><td class="type">Crypto</td><td>Don't leave more than working capital on an exchange; assume any venue can halt withdrawals.</td></tr>
+      <tr><td class="name">API-key / wallet compromise</td><td class="type">Security</td><td>Withdrawal-disabled keys, IP allowlists, secrets in a vault, least privilege, key rotation.</td></tr>
+      <tr><td class="name">Latency you can't win</td><td class="type">Structural</td><td>Don't compete on speed against co-located HFT; pick horizons and tasks where latency isn't the edge.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="failure"><span class="section-num">§ 14</span>The failure-mode catalogue</h2>
+  <p>Each is a real, documented way this project goes wrong — with how it shows up and what to do.</p>
+  <table>
+    <thead><tr><th>Failure</th><th>How it shows up &amp; why</th><th>Detect / mitigate</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Rollout error accumulation</td><td>Generated market drifts into nonsense over a long rollout; autoregressive errors compound. In LOB-Bench a weak model hit ~126 average L1 vs ~2.45 for LOBS5.</td><td>Measure rollout stability early; report long-horizon LOB-Bench, not just one-step metrics; use scheduled sampling / robust tokenizers.</td></tr>
+      <tr><td class="name">Mode collapse / repetition</td><td>Generation loops or always emits the most common token; model learned the marginal, not the dynamics.</td><td>Check generated token entropy vs real; sample with temperature; verify stylized facts, not just perplexity.</td></tr>
+      <tr><td class="name">Tokenizer information loss</td><td>Tokens can't be decoded back into a valid book; or binning threw away the predictive signal.</td><td>Enforce reversibility tests; ablate bin granularity; confirm decoded books validate against the engine.</td></tr>
+      <tr><td class="name">Data leakage</td><td>Backtest looks brilliant, live is flat. Caused by lookahead, normalization-on-full-set, or survivorship.</td><td>Strict time splits, fit scalers on train only, embargo/purge, survivorship-free universe. Distrust great results.</td></tr>
+      <tr><td class="name">Alpha decay / non-stationarity</td><td>A signal that worked stops working as the market adapts (TLOB documents this directly).</td><td>Bet on structure (simulator) over alpha; monitor decay; retrain; don't assume yesterday's edge persists.</td></tr>
+      <tr><td class="name">Simulator-fabricated profit</td><td>A policy is "profitable" only because of a matching-engine quirk.</td><td>Unit-test the engine; know its assumptions; sanity-check against a second simulator or simple analytic cases.</td></tr>
+      <tr><td class="name">Compute / cost overrun</td><td>A big pretrain run burns the budget before the loop was even validated.</td><td>Prove everything at small scale first; verify the scaling curve on 3 points before any large run; use spot instances.</td></tr>
+      <tr><td class="name">Partial-observability ceiling</td><td>Model plateaus because it fundamentally can't see hidden intent.</td><td>Accept the ceiling; target tasks (execution, simulation) where full observability isn't required.</td></tr>
+      <tr><td class="name">Reproducibility failure</td><td>Can't recreate last month's result; data or seed drifted.</td><td>Version data by hash, pin seeds and configs, log everything to a tracker.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="mlops"><span class="section-num">§ 15</span>Engineering &amp; MLOps</h2>
+  <ul>
+    <li><strong>Repo &amp; config:</strong> separate <code>data/ tokenize/ model/ sim/ eval/ trade/</code>; every run driven by a versioned config file, no magic constants.</li>
+    <li><strong>Pipeline orchestration:</strong> data → tokenize → train → eval as reproducible, resumable stages (Make, Prefect, or simple DAG scripts).</li>
+    <li><strong>Tracking &amp; registry:</strong> W&amp;B / MLflow for runs; a model registry so a checkpoint is traceable to its data hash, config, and eval scores.</li>
+    <li><strong>Testing:</strong> unit-test the matching engine and the tokenizer's reversibility above all; integration-test the data pipeline against known-good days.</li>
+    <li><strong>Cost monitoring:</strong> tag GPU spend per experiment; a dashboard prevents the quiet four-figure surprise.</li>
+  </ul>
+
+  <!-- ===================== PART IV ===================== -->
+  <div class="part-label">Part IV · Sequencing</div>
+
+  <h2 id="plan"><span class="section-num">§ 16</span>The phased plan &amp; go/no-go gates</h2>
+  <p>Each phase has an output and a <strong>gate</strong> — an explicit condition for proceeding, or for killing the project. A real plan tells you when to stop.</p>
+
+  <ol class="phases">
+    <li id="phase0">
+      <h3>Internalize the frame</h3>
+      <div class="phase-meta"><b>~1–2 weeks</b> · reading, no code</div>
+      <p>Read LOBS5 and TradeFM end to end; skim TLOB and LiT; read Harris on order types and matching (<a class="xref" href="index.html#books">Ref §14</a>). Be able to whiteboard why a burst of cancels at the best bid is a token with predictive content.</p>
+      <div class="gate-row"><b>Gate:</b> you can explain the LOB-as-language thesis and the MBO/MBP distinction unaided. If not, stay here.</div>
+    </li>
+    <li id="phase1">
+      <h3>Supervised baseline on a fixed benchmark</h3>
+      <div class="phase-meta"><b>~3–4 weeks</b> · PyTorch · single GPU/Colab</div>
+      <p>Get FI-2010 (<a class="xref" href="index.html#datasets">Ref §10</a>) and reproduce DeepLOB, then TLOB, for mid-price direction. Gives a known-good harness and a number to beat.</p>
+      <div class="gate-row"><b>Gate:</b> your F1 matches the published DeepLOB/TLOB numbers. If you can't reproduce a known result, fix that before generating anything.</div>
+    </li>
+    <li id="phase2">
+      <h3>Build your own event corpus</h3>
+      <div class="phase-meta"><b>~2–4 weeks setup, then ongoing</b> · your edge</div>
+      <p>Stand up the cryptofeed + ccxt collector, write reconstruction with gap detection and checksum validation, store as a compact event log. Treat it as a streaming-systems problem.</p>
+      <div class="gate-row"><b>Gate:</b> a week of data reconstructs to books that pass exchange checksums with zero unexplained gaps. Dirty data here ruins everything later.</div>
+    </li>
+    <li id="phase3">
+      <h3>Tokenization — the hard part</h3>
+      <div class="phase-meta"><b>~3–6 weeks</b> · dominates results</div>
+      <p>Build scale-invariant digit-level and feature-binning tokenizers; ablate them and the time-bundling schemes; verify reversibility against the engine.</p>
+      <div class="gate-row"><b>Gate:</b> tokens decode back into valid books, and one scheme clearly wins on perplexity/fidelity. Don't pretrain on a tokenizer you haven't validated.</div>
+    </li>
+    <li id="phase4">
+      <h3>Pretrain a small generative model</h3>
+      <div class="phase-meta"><b>~4–8 weeks</b> · rented A100/H100</div>
+      <p>Decoder-only or S5, next-token, ~10–50M params. Prove the loop, then verify your scaling curve on a 3-point ladder before any larger run.</p>
+      <div class="gate-row"><b>Gate:</b> loss scales the right way on the ladder. If bigger doesn't help at small scale, a big run won't save it — stop and revisit data/tokenizer.</div>
+    </li>
+    <li id="phase5">
+      <h3>Evaluate — generation before prediction</h3>
+      <div class="phase-meta"><b>~3–4 weeks</b> · LOB-Bench + stylized facts</div>
+      <p>Run the five-layer evaluation (§10): stylized facts and LOB-Bench first, predictive skill against Phase-1 baselines second.</p>
+      <div class="gate-row"><b>Gate:</b> the model reproduces stylized facts and posts a competitive LOB-Bench score. <em>This is the natural finish line for the learning/simulator goals.</em></div>
+    </li>
+    <li id="phase6">
+      <h3>Trading — only now</h3>
+      <div class="phase-meta"><b>~4–8 weeks</b> · AlphaTrade / FinRL</div>
+      <p>Wrap as an execution policy on JAX-LOB. Validate with the full §12 discipline: walk-forward, purged CV, costs, deflated Sharpe, regime tests.</p>
+      <div class="gate-row"><b>Gate:</b> positive cost-adjusted, deflated performance across multiple regimes. Anything less stays in simulation — do not risk capital.</div>
+    </li>
+    <li id="phase7">
+      <h3>Package &amp; share</h3>
+      <div class="phase-meta"><b>~2 weeks</b> · the part most people skip</div>
+      <p>Clean the repo, write the README and a short technical post, release the simulator or eval harness. A working open simulator + tokenizer is a genuinely useful artifact regardless of the trading result.</p>
+      <div class="gate-row"><b>Gate:</b> someone else can clone it and reproduce one headline number from your writeup.</div>
+    </li>
+  </ol>
+
+  <h2 id="schedule"><span class="section-num">§ 17</span>A concrete schedule</h2>
+  <p>The one starting move that saves the most time: <strong>run Phase 1 and Phase 2 in parallel.</strong> The collector banks data while you learn the modelling harness on a clean benchmark, so by the time the transformer loop works you already have weeks of your own events to tokenize.</p>
+  <table>
+    <thead><tr><th>Weeks</th><th>Focus</th><th>Milestone / gate</th></tr></thead>
+    <tbody>
+      <tr><td class="name">1–2</td><td>Phase 0 + stand up the collector</td><td>Collector live; frame written.</td></tr>
+      <tr><td class="name">3–6</td><td>Phase 1 baseline; data accumulating</td><td>DeepLOB/TLOB reproduced on FI-2010.</td></tr>
+      <tr><td class="name">7–12</td><td>Phase 3 tokenizer ablation</td><td>Two tokenizers compared; reversibility passes.</td></tr>
+      <tr><td class="name">13–20</td><td>Phase 4 pretrain + scaling ladder</td><td>Checkpoint + scaling curve gate.</td></tr>
+      <tr><td class="name">21–25</td><td>Phase 5 five-layer evaluation</td><td>LOB-Bench + stylized facts pass.</td></tr>
+      <tr><td class="name">26+</td><td>Fork: Phase 6 (trade) or Phase 7 (release)</td><td>Per your §3 goal.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="map"><span class="section-num">§ 18</span>Resource map to the Reference</h2>
+  <p>Where each part of this build draws on the catalogue:</p>
+  <ul>
+    <li><strong>Lineage &amp; models</strong> → <a class="xref" href="index.html#microstructure">Ref §08</a></li>
+    <li><strong>RL bridge</strong> → <a class="xref" href="index.html#rl">Ref §07</a></li>
+    <li><strong>Data sources, tooling &amp; storage</strong> → <a class="xref" href="index.html#tools">Ref §09</a></li>
+    <li><strong>Datasets &amp; benchmarks (FI-2010, LOBSTER, LOB-Bench)</strong> → <a class="xref" href="index.html#datasets">Ref §10</a></li>
+    <li><strong>The lab behind the open stack</strong> → <a class="xref" href="index.html#labs-open">Ref §11</a></li>
+    <li><strong>Books &amp; validation discipline</strong> → <a class="xref" href="index.html#books">Ref §14</a> · <a class="xref" href="index.html#path">Ref §16</a></li>
+  </ul>
+
+  <div class="ornament">✦ ✦ ✦</div>
+  <div class="callout">
+    <strong>An honest caveat</strong>
+    Published "X% returns" almost always hide lookahead bias, survivorship, missing costs, or benchmark contamination. The open stack here is excellent for learning and as a research scaffold; none of it is a turnkey money machine, and the firms that make money keep their real models private. This is a technical roadmap, not investment advice. Keep both files in the same folder so the cross-links resolve.
+  </div>
+
+  <footer>
+    <span>Implementation Roadmap</span>
+    <span>Comprehensive Edition · June 2026 · companion to index.html</span>
+    <span>For study, not advice</span>
+  </footer>
+
+</div>
+</body>
+</html>
