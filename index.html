@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foundation Models for Automated Trading — A Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3ede1;
+    --bg-elevated: #ebe3d2;
+    --ink: #1a1614;
+    --ink-soft: #4a423b;
+    --ink-muted: #76695e;
+    --rule: #c9bda8;
+    --accent: #7a1e1e;
+    --accent-soft: #a23b3b;
+    --gold: #8a6a1d;
+    --teal: #1d4a4a;
+    --grain-bg: rgba(0,0,0,0.015);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.65;
+    background-image: radial-gradient(circle at 1px 1px, var(--grain-bg) 1px, transparent 0);
+    background-size: 4px 4px;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 80px 56px 120px; }
+
+  /* MASTHEAD */
+  .masthead {
+    border-top: 4px double var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 24px 0 18px;
+    margin-bottom: 56px;
+  }
+  .masthead-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-muted);
+    margin-bottom: 30px;
+  }
+  .masthead-top .dot {
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+    margin: 0 8px; vertical-align: middle;
+  }
+  h1.title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.02; letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+  }
+  h1.title em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .subtitle {
+    font-family: 'Newsreader', serif; font-style: italic;
+    font-size: 22px; color: var(--ink-soft);
+    margin: 0; max-width: 760px;
+  }
+
+  /* HEADERS */
+  h2 {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 34px; line-height: 1.15; letter-spacing: -0.015em;
+    margin: 80px 0 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+    font-variation-settings: "opsz" 60;
+  }
+  h2 .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.15em;
+    color: var(--accent); display: block;
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+  h3 {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 22px; letter-spacing: -0.01em;
+    margin: 40px 0 14px; color: var(--ink);
+  }
+  h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.15em; font-weight: 600;
+    color: var(--accent); margin: 28px 0 12px;
+  }
+
+  /* TEXT */
+  p { margin: 0 0 1em; }
+  .lede {
+    font-size: 21px; line-height: 1.55;
+    color: var(--ink-soft); font-weight: 400;
+    margin-bottom: 32px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px; font-style: italic;
+  }
+
+  /* LINKS */
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent-soft);
+    transition: color 0.15s ease;
+  }
+  a:hover {
+    color: var(--ink);
+    text-decoration-color: var(--ink);
+    background: rgba(122, 30, 30, 0.05);
+  }
+  a.repo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.92em; text-decoration: none;
+    border-bottom: 1px dotted var(--accent-soft);
+  }
+  a.repo::before { content: "↗ "; opacity: 0.5; }
+  a.paper {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em; text-decoration: none;
+    color: var(--teal);
+    border-bottom: 1px dotted var(--teal);
+    padding-bottom: 1px;
+  }
+  a.paper:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em; background: var(--bg-elevated);
+    padding: 2px 6px; border-radius: 2px;
+    border: 1px solid var(--rule); color: var(--teal);
+  }
+
+  /* TABLES */
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 24px 0; font-size: 16px;
+  }
+  thead tr { border-bottom: 2px solid var(--ink); }
+  th {
+    text-align: left; padding: 12px 14px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  td {
+    padding: 14px 14px; border-bottom: 1px solid var(--rule);
+    vertical-align: top; line-height: 1.55;
+  }
+  tbody tr:hover { background: var(--bg-elevated); }
+  td.name { font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+  /* LISTS */
+  ul, ol { padding-left: 24px; margin: 16px 0 24px; }
+  li { margin-bottom: 10px; line-height: 1.6; }
+  ul li::marker { color: var(--accent); }
+  ol li::marker { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  /* CALLOUT */
+  .callout {
+    background: var(--bg-elevated);
+    border-left: 4px solid var(--accent);
+    padding: 20px 24px; margin: 32px 0;
+    font-style: italic; color: var(--ink-soft);
+    position: relative;
+  }
+  .callout::before {
+    content: "❡"; font-family: 'Fraunces', serif;
+    font-size: 32px; color: var(--accent);
+    position: absolute; top: 12px; right: 20px;
+    font-style: normal; opacity: 0.4;
+  }
+  .callout strong {
+    color: var(--accent); font-style: normal;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    display: block; margin-bottom: 8px;
+  }
+
+  /* CROSS-REF BANNER (companion file) */
+  .companion {
+    background: var(--teal);
+    color: var(--bg);
+    padding: 18px 24px; margin: 0 0 48px;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 18px; flex-wrap: wrap;
+    border-radius: 2px;
+  }
+  .companion .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; opacity: 0.7;
+    display: block; margin-bottom: 4px;
+  }
+  .companion .desc { font-family: 'Newsreader', serif; font-size: 17px; }
+  .companion a {
+    color: var(--bg); font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; letter-spacing: 0.06em; white-space: nowrap;
+    text-decoration: none; border: 1px solid rgba(243,237,225,0.5);
+    padding: 10px 18px; border-radius: 2px;
+  }
+  .companion a:hover { background: rgba(243,237,225,0.15); color: var(--bg); }
+  .xref {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8em; color: var(--teal);
+    text-decoration: none; border-bottom: 1px dotted var(--teal);
+    white-space: nowrap;
+  }
+
+  /* TIMELINE */
+  .timeline { list-style: none; padding: 0; margin: 24px 0; border-left: 2px solid var(--rule); }
+  .timeline li {
+    padding: 12px 0 12px 28px; margin: 0; position: relative;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .timeline li::before {
+    content: ""; position: absolute; left: -7px; top: 22px;
+    width: 12px; height: 12px;
+    background: var(--accent); border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+  .timeline li.hrt::before { background: var(--teal); }
+  .timeline .year {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.08em;
+    display: block; margin-bottom: 2px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--bg-elevated);
+    border: 1px solid var(--rule);
+    padding: 28px 32px; margin: 0 0 48px;
+    column-count: 2; column-gap: 40px;
+  }
+  .toc-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.18em; color: var(--ink-muted);
+    margin-bottom: 14px; column-span: all;
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc-counter; }
+  .toc li {
+    counter-increment: toc-counter; margin-bottom: 6px;
+    font-family: 'Newsreader', serif; font-size: 15px;
+    break-inside: avoid;
+  }
+  .toc li::before {
+    content: counter(toc-counter, decimal-leading-zero) "  ";
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--accent); font-weight: 500;
+  }
+  .toc a { text-decoration: none; color: var(--ink); }
+  .toc a:hover { color: var(--accent); background: transparent; }
+
+  /* PATH STEPS */
+  .path-list { counter-reset: path; list-style: none; padding: 0; }
+  .path-list li {
+    counter-increment: path;
+    padding: 14px 0 14px 60px; position: relative;
+    border-bottom: 1px solid var(--rule);
+  }
+  .path-list li::before {
+    content: counter(path, decimal-leading-zero);
+    position: absolute; left: 0; top: 16px;
+    font-family: 'Fraunces', serif; font-size: 28px;
+    font-weight: 300; color: var(--accent); line-height: 1;
+  }
+
+  /* DROP CAP */
+  .drop-cap::first-letter {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 78px; float: left; line-height: 0.85;
+    padding: 8px 12px 0 0; color: var(--accent);
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 120px; padding-top: 32px;
+    border-top: 4px double var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-muted);
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .ornament {
+    text-align: center; color: var(--accent);
+    font-size: 22px; margin: 48px 0;
+    letter-spacing: 1em; font-family: 'Fraunces', serif;
+  }
+
+  /* MOBILE */
+  @media (max-width: 720px) {
+    .page { padding: 40px 22px 80px; }
+    body { font-size: 16px; }
+    h1.title { font-size: 40px; }
+    h2 { font-size: 26px; margin-top: 56px; }
+    h3 { font-size: 19px; }
+    .toc { column-count: 1; padding: 20px; }
+    .masthead-top { flex-direction: column; gap: 6px; }
+    table { font-size: 13px; }
+    th, td { padding: 10px 8px; }
+    td.name { white-space: normal; }
+    .drop-cap::first-letter { font-size: 56px; }
+    .companion { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media print {
+    body { background: white; }
+    .page { padding: 20px; }
+    h2 { page-break-after: avoid; }
+    .timeline li, .path-list li { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="masthead-top">
+      <span>Reference Volume <span class="dot"></span> 01 <span class="dot"></span> Expanded Edition</span>
+      <span>Quantitative Systems &amp; AI</span>
+      <span>2026</span>
+    </div>
+    <h1 class="title">Foundation Models<br>for <em>Automated Trading</em></h1>
+    <p class="subtitle">A comprehensive working reference — papers, surveys, models, tools, datasets, labs, funds, conferences, and books. Every link goes somewhere useful.</p>
+  </header>
+
+  <div class="companion">
+    <div>
+      <span class="label">Companion file</span>
+      <span class="desc">This reference now maps to a step-by-step build plan for event-stream microstructure models — the HRT / TradeFM paradigm.</span>
+    </div>
+    <a href="roadmap.html">Open the Roadmap →</a>
+  </div>
+
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#foundational">Foundational papers</a></li>
+      <li><a href="#surveys">Survey &amp; review papers</a></li>
+      <li><a href="#ts-transformers">Time-series transformers (pre-TSFM)</a></li>
+      <li><a href="#tsfm">Time series foundation models</a></li>
+      <li><a href="#fin-llms">Finance LLMs</a></li>
+      <li><a href="#agents">Multi-agent LLM trading frameworks</a></li>
+      <li><a href="#rl">Reinforcement learning for trading</a></li>
+      <li><a href="#microstructure">Microstructure &amp; order-book deep learning</a></li>
+      <li><a href="#tools">Open-source tools &amp; libraries</a></li>
+      <li><a href="#datasets">Datasets &amp; benchmarks</a></li>
+      <li><a href="#labs-open">Open-source labs &amp; research groups</a></li>
+      <li><a href="#labs-private">Private &amp; industry labs</a></li>
+      <li><a href="#conferences">Conferences &amp; venues</a></li>
+      <li><a href="#books">Books &amp; courses</a></li>
+      <li><a href="#milestones">Major achievements — a timeline</a></li>
+      <li><a href="#path">A suggested learning path</a></li>
+    </ol>
+  </nav>
+
+  <p class="lede drop-cap">People conflate two very different things under the banner "foundation models for trading." There are Time Series Foundation Models — pretrained on billions of raw numerical sequences across domains. And there are LLMs applied to finance — text-first models that reason over news, filings, and earnings calls. But there is a third, fast-growing category that this edition now treats as first-class: event-stream microstructure models — transformers trained on the raw order-flow of markets, the way HRT and TradeFM treat the limit order book "as a language." Most serious work in 2026 lives at the intersection, supported by a deep stack of classical machine-learning tools that this reference also catalogs.</p>
+
+  <!-- 1. FOUNDATIONAL -->
+  <h2 id="foundational"><span class="section-num">§ 01</span>Foundational papers</h2>
+  <p>The must-reads, in roughly the order they shaped the field.</p>
+
+  <table>
+    <thead><tr><th>Paper</th><th>Why it matters &amp; link</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Attention Is All You Need <em>(Vaswani et al., 2017)</em></td><td>The transformer architecture underlying everything that followed.<br><a class="paper" href="https://arxiv.org/abs/1706.03762" target="_blank">arXiv:1706.03762</a></td></tr>
+      <tr><td class="name">FinBERT <em>(Araci, 2019)</em></td><td>First domain-tuned BERT for financial sentiment. The de facto NLP baseline in finance for years.<br><a class="paper" href="https://arxiv.org/abs/1908.10063" target="_blank">arXiv:1908.10063</a></td></tr>
+      <tr><td class="name">DeepLOB <em>(Zhang et al., 2018)</em></td><td>Landmark deep-learning model for limit-order-book prediction. The starting point for §08. <a class="xref" href="roadmap.html#landscape">→ Roadmap: Lineage</a><br><a class="paper" href="https://arxiv.org/abs/1808.03668" target="_blank">arXiv:1808.03668</a></td></tr>
+      <tr><td class="name">BloombergGPT <em>(Wu et al., 2023)</em></td><td>First major finance-specific LLM. 50B params, ~$5M training cost.<br><a class="paper" href="https://arxiv.org/abs/2303.17564" target="_blank">arXiv:2303.17564</a></td></tr>
+      <tr><td class="name">Can ChatGPT Forecast Stock Returns? <em>(Lopez-Lira &amp; Tang, 2023)</em></td><td>Landmark study: GPT-4 sentiment on news headlines significantly predicts cross-sectional returns. Sparked the entire LLM-trading wave.<br><a class="paper" href="https://arxiv.org/abs/2304.07619" target="_blank">arXiv:2304.07619</a></td></tr>
+      <tr><td class="name">FinGPT <em>(Yang, Liu, Wang, 2023)</em></td><td>First major open-source finance LLM. LoRA-tuned, &lt;$300 to retrain.<br><a class="paper" href="https://arxiv.org/abs/2306.06031" target="_blank">arXiv:2306.06031</a></td></tr>
+      <tr><td class="name">FinRL <em>(Liu et al., 2020)</em></td><td>First open-source RL framework for finance.<br><a class="paper" href="https://arxiv.org/abs/2011.09607" target="_blank">arXiv:2011.09607</a></td></tr>
+      <tr><td class="name">FinRL-Meta <em>(NeurIPS 2022)</em></td><td>Market environments and benchmarks for data-driven financial RL.<br><a class="paper" href="https://arxiv.org/abs/2211.03107" target="_blank">arXiv:2211.03107</a></td></tr>
+      <tr><td class="name">LLMs Are Zero-Shot Time Series Forecasters <em>(Gruver et al., NeurIPS 2024)</em></td><td>Foundational result that vanilla LLMs can forecast time series without fine-tuning.<br><a class="paper" href="https://arxiv.org/abs/2310.07820" target="_blank">arXiv:2310.07820</a></td></tr>
+      <tr><td class="name">Generative AI for End-to-End LOB Modelling <em>(Nagy et al., 2023)</em></td><td><strong>The reproducible cornerstone of the event-stream paradigm.</strong> First end-to-end autoregressive model of tokenized LOB messages, decoded by a JAX-LOB simulator. <a class="xref" href="roadmap.html#stack">→ Roadmap: The Stack</a><br><a class="paper" href="https://arxiv.org/abs/2309.00638" target="_blank">arXiv:2309.00638</a></td></tr>
+      <tr><td class="name">Sentiment Trading with Large Language Models <em>(Kirtac &amp; Germano, 2024)</em></td><td>Validates LLM-derived sentiment in cross-sectional return prediction.<br><a class="paper" href="https://arxiv.org/abs/2412.19245" target="_blank">arXiv:2412.19245</a></td></tr>
+      <tr><td class="name">AI in Investment Analysis: LLMs for Equity Stock Ratings <em>(Papasotiriou et al., JPMorgan, 2024)</em></td><td>JPMorgan-authored study on LLMs producing equity ratings. Same group later authored TradeFM (§08).<br><a class="paper" href="https://arxiv.org/abs/2411.00856" target="_blank">arXiv:2411.00856</a></td></tr>
+      <tr><td class="name">FinMem <em>(Yu et al., 2023)</em></td><td>LLM trading agent with layered memory and character design.<br><a class="paper" href="https://arxiv.org/abs/2311.13743" target="_blank">arXiv:2311.13743</a></td></tr>
+      <tr><td class="name">FinAgent <em>(Zhang et al., 2024)</em></td><td>Multimodal foundation agent for trading.<br><a class="paper" href="https://arxiv.org/abs/2402.18485" target="_blank">arXiv:2402.18485</a></td></tr>
+      <tr><td class="name">TradingAgents <em>(Xiao et al., 2024)</em></td><td>Multi-agent LLM framework mirroring real trading firms.<br><a class="paper" href="https://arxiv.org/abs/2412.20138" target="_blank">arXiv:2412.20138</a></td></tr>
+      <tr><td class="name">StockAgent <em>(2024)</em></td><td>LLM-based simulated market environments.<br><a class="paper" href="https://arxiv.org/abs/2407.18957" target="_blank">arXiv:2407.18957</a></td></tr>
+      <tr><td class="name">FinCon <em>(NeurIPS 2024)</em></td><td>Multi-agent system with conceptual verbal reinforcement.<br><a class="paper" href="https://arxiv.org/abs/2407.06567" target="_blank">arXiv:2407.06567</a></td></tr>
+      <tr><td class="name">Time Machine GPT <em>(Drinkall et al., 2024)</em></td><td>Studies temporal awareness and bias in financial LLMs.<br><a class="paper" href="https://arxiv.org/abs/2404.18543" target="_blank">arXiv:2404.18543</a></td></tr>
+      <tr><td class="name">Automate Strategy Finding with LLM in Quant Investment <em>(2024)</em></td><td>LLMs generating executable alpha factors with multi-agent evaluation.<br><a class="paper" href="https://arxiv.org/abs/2409.06289" target="_blank">arXiv:2409.06289</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 2. SURVEYS -->
+  <h2 id="surveys"><span class="section-num">§ 02</span>Survey &amp; review papers</h2>
+  <p>If you only read a handful of things, read these. They map the entire field and will save you months.</p>
+
+  <table>
+    <thead><tr><th>Survey</th><th>What it covers</th></tr></thead>
+    <tbody>
+      <tr><td class="name">A Survey of Large Language Models in Finance (FinLLMs) <em>(Lee et al., 2024)</em></td><td>Definitive landscape of finance LLMs.<br><a class="paper" href="https://arxiv.org/abs/2402.02315" target="_blank">arXiv:2402.02315</a></td></tr>
+      <tr><td class="name">Large Language Model Agent in Financial Trading: A Survey <em>(Ding et al., 2024)</em></td><td>Comprehensive survey of LLM agents for trading specifically.<br><a class="paper" href="https://arxiv.org/abs/2408.06361" target="_blank">arXiv:2408.06361</a></td></tr>
+      <tr><td class="name">A Survey of Financial AI: Architectures, Advances and Open Challenges <em>(Liu, 2024)</em></td><td>Broad architectural survey across the finance AI stack.<br><a class="paper" href="https://arxiv.org/abs/2411.12747" target="_blank">arXiv:2411.12747</a></td></tr>
+      <tr><td class="name">The New Quant: A Survey of LLMs in Financial Prediction &amp; Trading <em>(2025)</em></td><td>The most recent comprehensive trading-focused LLM survey.<br><a class="paper" href="https://arxiv.org/abs/2510.05533" target="_blank">arXiv:2510.05533</a></td></tr>
+      <tr><td class="name">Advancing Financial Engineering with Foundation Models <em>(Chen et al., 2025)</em></td><td>Progress, applications, and challenges of FMs in finance.<br><a class="paper" href="https://arxiv.org/abs/2507.18577" target="_blank">arXiv:2507.18577</a></td></tr>
+      <tr><td class="name">Empowering Time Series Analysis with Foundation Models <em>(Ye et al., 2024)</em></td><td>Comprehensive TSFM survey.<br><a class="paper" href="https://arxiv.org/abs/2405.02358" target="_blank">arXiv:2405.02358</a></td></tr>
+      <tr><td class="name">Foundation Models for Time Series Analysis: A Tutorial and Survey <em>(2024)</em></td><td>Tutorial-style introduction to TSFMs.<br><a class="paper" href="https://arxiv.org/abs/2403.14735" target="_blank">arXiv:2403.14735</a></td></tr>
+      <tr><td class="name">Large Language Models for Time Series: A Survey <em>(2024)</em></td><td>Focused survey on LLM-time-series intersection.<br><a class="paper" href="https://arxiv.org/abs/2402.01801" target="_blank">arXiv:2402.01801</a></td></tr>
+      <tr><td class="name">Revisiting Time Series Foundation Models in Finance <em>(2025)</em></td><td>Critical re-evaluation of TSFM claims in finance.<br><a class="paper" href="https://arxiv.org/abs/2511.18578" target="_blank">arXiv:2511.18578</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 3. TS TRANSFORMERS -->
+  <h2 id="ts-transformers"><span class="section-num">§ 03</span>Time-series transformers (pre-TSFM)</h2>
+  <p>The architectures that made TSFMs possible. Many TSFM backbones descend directly from these.</p>
+
+  <table>
+    <thead><tr><th>Model</th><th>Notes &amp; link</th></tr></thead>
+    <tbody>
+      <tr><td class="name">N-BEATS <em>(2019)</em></td><td>Pure deep-learning forecaster that beat statistical methods on M-competition data.<br><a class="paper" href="https://arxiv.org/abs/1905.10437" target="_blank">arXiv:1905.10437</a></td></tr>
+      <tr><td class="name">Temporal Fusion Transformer (TFT) <em>(2019)</em></td><td>Interpretable multi-horizon forecasting model. Widely deployed in industry.<br><a class="paper" href="https://arxiv.org/abs/1912.09363" target="_blank">arXiv:1912.09363</a></td></tr>
+      <tr><td class="name">Informer <em>(AAAI 2021)</em></td><td>Efficient transformer for long-sequence time-series forecasting (ProbSparse).<br><a class="paper" href="https://arxiv.org/abs/2012.07436" target="_blank">arXiv:2012.07436</a></td></tr>
+      <tr><td class="name">Autoformer <em>(NeurIPS 2021)</em></td><td>Decomposition transformer with auto-correlation mechanism.<br><a class="paper" href="https://arxiv.org/abs/2106.13008" target="_blank">arXiv:2106.13008</a></td></tr>
+      <tr><td class="name">FEDformer <em>(2022)</em></td><td>Frequency-enhanced decomposed transformer.<br><a class="paper" href="https://arxiv.org/abs/2201.12740" target="_blank">arXiv:2201.12740</a></td></tr>
+      <tr><td class="name">N-HiTS <em>(2022)</em></td><td>Successor to N-BEATS with hierarchical interpolation.<br><a class="paper" href="https://arxiv.org/abs/2201.12886" target="_blank">arXiv:2201.12886</a></td></tr>
+      <tr><td class="name">PatchTST <em>(ICLR 2023)</em></td><td>Highly influential — patch embeddings for time series. Backbone for many TSFMs.<br><a class="paper" href="https://arxiv.org/abs/2211.14730" target="_blank">arXiv:2211.14730</a></td></tr>
+      <tr><td class="name">TimesNet <em>(ICLR 2023)</em></td><td>2D-variation modeling for general time-series analysis.<br><a class="paper" href="https://arxiv.org/abs/2210.02186" target="_blank">arXiv:2210.02186</a></td></tr>
+      <tr><td class="name">DLinear <em>(AAAI 2023)</em></td><td>Surprisingly competitive linear baseline that humbled many transformers.<br><a class="paper" href="https://arxiv.org/abs/2205.13504" target="_blank">arXiv:2205.13504</a></td></tr>
+      <tr><td class="name">Crossformer <em>(ICLR 2023)</em></td><td>Cross-dimension attention for multivariate forecasting.<br><a class="paper" href="https://openreview.net/forum?id=vSVLM2j9eie" target="_blank">OpenReview</a></td></tr>
+      <tr><td class="name">iTransformer <em>(ICLR 2024)</em></td><td>Inverts the transformer — attention on variables, FFN on time.<br><a class="paper" href="https://arxiv.org/abs/2310.06625" target="_blank">arXiv:2310.06625</a></td></tr>
+      <tr><td class="name">GPT4TS / OFA <em>(NeurIPS 2023)</em></td><td>"One Fits All" — freezes a pretrained GPT-2 backbone and adapts to time series.<br><a class="paper" href="https://arxiv.org/abs/2302.11939" target="_blank">arXiv:2302.11939</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 4. TSFM -->
+  <h2 id="tsfm"><span class="section-num">§ 04</span>Time series foundation models</h2>
+  <p>Pretrained on huge cross-domain time-series corpora. Zero-shot or fine-tuned forecasting on price series.</p>
+
+  <table>
+    <thead><tr><th>Model</th><th>Org</th><th>Links</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Chronos / Chronos-2</td><td>Amazon Science</td><td>T5-based, value tokenization.<br><a class="paper" href="https://arxiv.org/abs/2403.07815" target="_blank">arXiv:2403.07815</a> · <a class="repo" href="https://github.com/amazon-science/chronos-forecasting" target="_blank">amazon-science/chronos-forecasting</a></td></tr>
+      <tr><td class="name">TimesFM / 2.5</td><td>Google Research</td><td>Decoder-only, patch embeddings, ~200M params, 16k context.<br><a class="paper" href="https://arxiv.org/abs/2310.10688" target="_blank">arXiv:2310.10688</a> · <a class="repo" href="https://github.com/google-research/timesfm" target="_blank">google-research/timesfm</a></td></tr>
+      <tr><td class="name">Moirai / Moirai-2</td><td>Salesforce</td><td>MoE with "any-variate" attention — best multivariate fit for finance.<br><a class="paper" href="https://arxiv.org/abs/2402.02592" target="_blank">arXiv:2402.02592</a> · <a class="repo" href="https://github.com/SalesforceAIResearch/uni2ts" target="_blank">SalesforceAIResearch/uni2ts</a></td></tr>
+      <tr><td class="name">Lag-Llama</td><td>ServiceNow + Mila</td><td>Strong probabilistic / quantile outputs.<br><a class="paper" href="https://arxiv.org/abs/2310.08278" target="_blank">arXiv:2310.08278</a> · <a class="repo" href="https://github.com/time-series-foundation-models/lag-llama" target="_blank">time-series-foundation-models/lag-llama</a></td></tr>
+      <tr><td class="name">TimeGPT</td><td>Nixtla</td><td>Semi-open commercial.<br><a class="paper" href="https://arxiv.org/abs/2310.03589" target="_blank">arXiv:2310.03589</a> · <a class="repo" href="https://github.com/Nixtla/nixtla" target="_blank">Nixtla/nixtla</a></td></tr>
+      <tr><td class="name">Kronos</td><td>Tsinghua University</td><td>Finance-specific. AAAI 2026. RankIC +93%.<br><a class="paper" href="https://arxiv.org/abs/2508.02739" target="_blank">arXiv:2508.02739</a> · <a class="repo" href="https://github.com/shiyu-coder/Kronos" target="_blank">shiyu-coder/Kronos</a></td></tr>
+      <tr><td class="name">MOMENT</td><td>CMU</td><td>Foundation model for general time series.<br><a class="paper" href="https://arxiv.org/abs/2402.03885" target="_blank">arXiv:2402.03885</a> · <a class="repo" href="https://github.com/moment-timeseries-foundation-model/moment" target="_blank">moment-timeseries-foundation-model</a></td></tr>
+      <tr><td class="name">Time-LLM</td><td>Monash + Ant Group</td><td>Reprograms existing LLMs for forecasting.<br><a class="paper" href="https://arxiv.org/abs/2310.01728" target="_blank">arXiv:2310.01728</a> · <a class="repo" href="https://github.com/KimMeen/Time-LLM" target="_blank">KimMeen/Time-LLM</a></td></tr>
+      <tr><td class="name">Granite TTM</td><td>IBM Research</td><td>Tiny Time Mixers — very compact, fast.<br><a class="paper" href="https://arxiv.org/abs/2401.03955" target="_blank">arXiv:2401.03955</a> · <a class="repo" href="https://github.com/ibm-granite/granite-tsfm" target="_blank">ibm-granite/granite-tsfm</a></td></tr>
+      <tr><td class="name">Timer-XL</td><td>THUML / Tsinghua</td><td>Long-context unified time-series model.<br><a class="paper" href="https://arxiv.org/abs/2410.04803" target="_blank">arXiv:2410.04803</a> · <a class="repo" href="https://github.com/thuml/Large-Time-Series-Model" target="_blank">thuml/Large-Time-Series-Model</a></td></tr>
+      <tr><td class="name">Sundial</td><td>Tsinghua</td><td>Market-leading on TimeBench.<br><a class="paper" href="https://arxiv.org/abs/2502.00816" target="_blank">arXiv:2502.00816</a> · <a class="repo" href="https://github.com/thuml/Sundial" target="_blank">thuml/Sundial</a></td></tr>
+      <tr><td class="name">Toto</td><td>Datadog</td><td>Observability-focused, fast.<br><a class="paper" href="https://arxiv.org/abs/2407.07874" target="_blank">arXiv:2407.07874</a> · <a class="repo" href="https://github.com/DataDog/toto" target="_blank">DataDog/toto</a></td></tr>
+      <tr><td class="name">Time-MoE</td><td>Princeton + Salesforce</td><td>Billion-parameter mixture-of-experts TSFM.<br><a class="paper" href="https://arxiv.org/abs/2409.16040" target="_blank">arXiv:2409.16040</a> · <a class="repo" href="https://github.com/Time-MoE/Time-MoE" target="_blank">Time-MoE/Time-MoE</a></td></tr>
+      <tr><td class="name">LLMTime</td><td>NYU + CMU</td><td>Frames forecasting as next-token prediction directly with off-the-shelf LLMs.<br><a class="paper" href="https://arxiv.org/abs/2310.07820" target="_blank">arXiv:2310.07820</a></td></tr>
+      <tr><td class="name">FinCast</td><td>Various</td><td>Finance-specific TSFM contender against Kronos.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>Note — TSFM vs event-stream</strong>
+    The models above forecast over evenly-sampled numeric series (OHLCV bars). They are <em>not</em> the same as the order-flow / message-stream models in §08 (DeepLOB, LOBS5, TradeFM), which model the irregular, discrete event stream of the limit order book itself. Don't mix the two paradigms: a TSFM consumes a bar; an event-stream model consumes an order placement, cancellation, or fill.
+  </div>
+
+  <!-- 5. FIN LLMs -->
+  <h2 id="fin-llms"><span class="section-num">§ 05</span>Finance LLMs</h2>
+  <table>
+    <thead><tr><th>Model</th><th>Org</th><th>Links</th></tr></thead>
+    <tbody>
+      <tr><td class="name">BloombergGPT</td><td>Bloomberg LP</td><td>Proprietary, 50B params, finance pretraining corpus.<br><a class="paper" href="https://arxiv.org/abs/2303.17564" target="_blank">arXiv:2303.17564</a></td></tr>
+      <tr><td class="name">FinGPT</td><td>AI4Finance</td><td>LoRA-tuned, multi-base.<br><a class="repo" href="https://github.com/AI4Finance-Foundation/FinGPT" target="_blank">AI4Finance-Foundation/FinGPT</a></td></tr>
+      <tr><td class="name">FinMA / PIXIU</td><td>The FinAI</td><td>LLaMA fine-tuned on 136K finance instructions.<br><a class="paper" href="https://arxiv.org/abs/2306.05443" target="_blank">arXiv:2306.05443</a> · <a class="repo" href="https://github.com/The-FinAI/PIXIU" target="_blank">The-FinAI/PIXIU</a></td></tr>
+      <tr><td class="name">InvestLM</td><td>NYU + AbacusAI</td><td>Investment-focused tuning on LLaMA.<br><a class="paper" href="https://arxiv.org/abs/2309.13064" target="_blank">arXiv:2309.13064</a> · <a class="repo" href="https://github.com/AbaciNLP/InvestLM" target="_blank">AbaciNLP/InvestLM</a></td></tr>
+      <tr><td class="name">FinTral</td><td>UBC + MBZUAI</td><td>Multimodal financial LLM with vision capabilities.<br><a class="paper" href="https://arxiv.org/abs/2402.10986" target="_blank">arXiv:2402.10986</a></td></tr>
+      <tr><td class="name">Instruct-FinGPT</td><td>AI4Finance</td><td>Instruction-tuned general LLM for finance sentiment.<br><a class="paper" href="https://arxiv.org/abs/2306.12659" target="_blank">arXiv:2306.12659</a></td></tr>
+      <tr><td class="name">XuanYuan</td><td>Du Xiaoman Financial</td><td>Major Chinese-market finance LLM.<br><a class="paper" href="https://arxiv.org/abs/2305.12002" target="_blank">arXiv:2305.12002</a></td></tr>
+      <tr><td class="name">DISC-FinLLM</td><td>Fudan University</td><td>Multi-task Chinese financial LLM.<br><a class="paper" href="https://arxiv.org/abs/2310.15205" target="_blank">arXiv:2310.15205</a> · <a class="repo" href="https://github.com/FudanDISC/DISC-FinLLM" target="_blank">FudanDISC/DISC-FinLLM</a></td></tr>
+      <tr><td class="name">Tongyi-Finance</td><td>Alibaba DAMO</td><td>Alibaba's Chinese-market finance LLM.</td></tr>
+      <tr><td class="name">Open-FinLLMs</td><td>The FinAI</td><td>Open finance LLM ecosystem.<br><a class="paper" href="https://arxiv.org/abs/2408.11878" target="_blank">arXiv:2408.11878</a></td></tr>
+      <tr><td class="name">Open FinLLM Leaderboard</td><td>The FinAI</td><td>HF leaderboard for finance LLMs.<br><a class="repo" href="https://huggingface.co/spaces/TheFinAI/Open-FinLLM-Leaderboard" target="_blank">huggingface.co/TheFinAI/Open-FinLLM-Leaderboard</a></td></tr>
+      <tr><td class="name">Trading-R1 / FinR1</td><td>Tauric Research</td><td>RL-trained trading reasoning model.<br><a class="repo" href="https://github.com/TauricResearch" target="_blank">TauricResearch</a></td></tr>
+      <tr><td class="name">FinRL-DeepSeek</td><td>AI4Finance</td><td>DeepSeek-based RL trading agent.<br><a class="repo" href="https://github.com/benstaf/FinRL_DeepSeek" target="_blank">benstaf/FinRL_DeepSeek</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 6. AGENTS -->
+  <h2 id="agents"><span class="section-num">§ 06</span>Multi-agent LLM trading frameworks</h2>
+  <p>LLM agents in specialized roles (analyst, trader, risk manager) collaborating like a small trading firm.</p>
+
+  <table>
+    <thead><tr><th>Project</th><th>What it does &amp; links</th></tr></thead>
+    <tbody>
+      <tr><td class="name">TradingAgents</td><td>Multi-agent framework with analyst, trader, and risk roles.<br><a class="repo" href="https://github.com/TauricResearch/TradingAgents" target="_blank">TauricResearch/TradingAgents</a> · <a class="paper" href="https://arxiv.org/abs/2412.20138" target="_blank">arXiv:2412.20138</a></td></tr>
+      <tr><td class="name">FinAgent</td><td>Multimodal tool-augmented trading agent.<br><a class="repo" href="https://github.com/Open-Finance-Lab/FinAgent" target="_blank">Open-Finance-Lab/FinAgent</a> · <a class="paper" href="https://arxiv.org/abs/2402.18485" target="_blank">arXiv:2402.18485</a></td></tr>
+      <tr><td class="name">FinMem</td><td>Memory-augmented trading agent.<br><a class="repo" href="https://github.com/pipiku915/FinMem-LLM-StockTrading" target="_blank">pipiku915/FinMem-LLM-StockTrading</a> · <a class="paper" href="https://arxiv.org/abs/2311.13743" target="_blank">arXiv:2311.13743</a></td></tr>
+      <tr><td class="name">FinCon</td><td>Verbal reinforcement multi-agent system. NeurIPS 2024.<br><a class="paper" href="https://arxiv.org/abs/2407.06567" target="_blank">arXiv:2407.06567</a></td></tr>
+      <tr><td class="name">StockAgent</td><td>Simulated market with LLM investor agents.<br><a class="paper" href="https://arxiv.org/abs/2407.18957" target="_blank">arXiv:2407.18957</a></td></tr>
+      <tr><td class="name">QuantAgent</td><td>Self-improving holy-grail seeker.<br><a class="paper" href="https://arxiv.org/abs/2402.03755" target="_blank">arXiv:2402.03755</a></td></tr>
+      <tr><td class="name">FinRobot</td><td>Open-source AI agent platform for finance.<br><a class="repo" href="https://github.com/AI4Finance-Foundation/FinRobot" target="_blank">AI4Finance-Foundation/FinRobot</a></td></tr>
+      <tr><td class="name">HedgeAgents</td><td>Hedge fund-style cooperating LLM agents.<br><a class="paper" href="https://arxiv.org/abs/2502.13165" target="_blank">arXiv:2502.13165</a></td></tr>
+      <tr><td class="name">INVESTORBENCH</td><td>Benchmark for LLM-based investing agents.<br><a class="paper" href="https://arxiv.org/abs/2412.18174" target="_blank">arXiv:2412.18174</a></td></tr>
+      <tr><td class="name">HARLF</td><td>Hierarchical RL + LLM sentiment integration for portfolio optimization.<br><a class="paper" href="https://arxiv.org/abs/2507.18560" target="_blank">arXiv:2507.18560</a></td></tr>
+      <tr><td class="name">Alpha-GPT</td><td>LLM-driven alpha mining (multiple versions).<br><a class="paper" href="https://arxiv.org/abs/2308.00016" target="_blank">arXiv:2308.00016</a></td></tr>
+      <tr><td class="name">Sociodojo</td><td>Society of LLM agents for financial investing.<br><a class="paper" href="https://arxiv.org/abs/2403.02611" target="_blank">arXiv:2403.02611</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 7. RL -->
+  <h2 id="rl"><span class="section-num">§ 07</span>Reinforcement learning for trading</h2>
+  <table>
+    <thead><tr><th>Tool</th><th>Repository</th></tr></thead>
+    <tbody>
+      <tr><td class="name">FinRL</td><td><a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL" target="_blank">AI4Finance-Foundation/FinRL</a></td></tr>
+      <tr><td class="name">FinRL-Meta</td><td><a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL-Meta" target="_blank">AI4Finance-Foundation/FinRL-Meta</a></td></tr>
+      <tr><td class="name">AlphaTrade</td><td>RL execution on the JAX-LOB simulator — the bridge from §08 models to trading. <a class="xref" href="roadmap.html#phase6">→ Roadmap: Phase 6</a><br><a class="repo" href="https://github.com/KangOxford/AlphaTrade" target="_blank">KangOxford/AlphaTrade</a></td></tr>
+      <tr><td class="name">TensorTrade</td><td><a class="repo" href="https://github.com/tensortrade-org/tensortrade" target="_blank">tensortrade-org/tensortrade</a></td></tr>
+      <tr><td class="name">gym-anytrading</td><td><a class="repo" href="https://github.com/AminHP/gym-anytrading" target="_blank">AminHP/gym-anytrading</a></td></tr>
+      <tr><td class="name">Stable-Baselines3</td><td><a class="repo" href="https://github.com/DLR-RM/stable-baselines3" target="_blank">DLR-RM/stable-baselines3</a></td></tr>
+      <tr><td class="name">Ray RLlib</td><td><a class="repo" href="https://docs.ray.io/en/latest/rllib/" target="_blank">docs.ray.io/rllib</a></td></tr>
+      <tr><td class="name">CleanRL</td><td><a class="repo" href="https://github.com/vwxyzjn/cleanrl" target="_blank">vwxyzjn/cleanrl</a> — single-file high-quality RL implementations</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 8. MICROSTRUCTURE -->
+  <h2 id="microstructure"><span class="section-num">§ 08</span>Microstructure &amp; order-book deep learning</h2>
+  <p>A more specialized but very important sub-field — and, as of 2026, the frontier. Most HFT and execution alpha lives here, and it is where HRT and JPMorgan are pushing the "foundation model" idea hardest. <a class="xref" href="roadmap.html">→ See the full Roadmap</a></p>
+
+  <h3>Classical supervised LOB models</h3>
+  <table>
+    <thead><tr><th>Paper / Tool</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="name">DeepLOB <em>(Zhang et al., 2018)</em></td><td>CNN-LSTM for limit-order-book prediction. ~60K params. The starting point everyone benchmarks against.<br><a class="paper" href="https://arxiv.org/abs/1808.03668" target="_blank">arXiv:1808.03668</a></td></tr>
+      <tr><td class="name">Multi-Horizon LOB Forecasting <em>(2020)</em></td><td>Encoder-decoder for LOB with multiple time horizons.<br><a class="paper" href="https://arxiv.org/abs/2105.10430" target="_blank">arXiv:2105.10430</a></td></tr>
+      <tr><td class="name">TransLOB / LOBTransformer</td><td>Early transformer-based LOB modeling.<br><a class="paper" href="https://arxiv.org/abs/2003.00130" target="_blank">arXiv:2003.00130</a></td></tr>
+      <tr><td class="name">TLOB <em>(Berti &amp; Kasneci, 2025)</em></td><td>Dual-attention transformer for price-trend prediction; also documents that LOB predictability is <em>declining over time</em> as markets grow more efficient. Read this before chasing alpha.<br><a class="paper" href="https://arxiv.org/abs/2502.15757" target="_blank">arXiv:2502.15757</a></td></tr>
+      <tr><td class="name">LiT — LOB Transformer <em>(Xiao et al., 2025)</em></td><td>Patch-based, convolution-free transformer; robust to distribution shift via fine-tuning.<br><a class="paper" href="https://arxiv.org/abs/2503.00622" target="_blank">arXiv (Frontiers in AI, 2025)</a></td></tr>
+      <tr><td class="name">Almgren-Chriss <em>(2001)</em></td><td>The classical baseline for optimal execution. Still the reference point.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Event-stream / generative microstructure foundation models — the HRT paradigm</h3>
+  <p>These treat the raw stream of order-book events — placements, cancellations, fills — as a sequence of "tokens" and train a generative transformer on it, exactly as you'd train an LLM on text. This is the paradigm Marc Khoury (HRT) described at ICML 2025 and that TradeFM (JPMorgan) made concrete in the open literature.</p>
+  <table>
+    <thead><tr><th>Work</th><th>What it is &amp; link</th></tr></thead>
+    <tbody>
+      <tr><td class="name">HRT — "Foundation Models for Automated Trading" <em>(Khoury, ICML 2025)</em></td><td>The talk that named the paradigm. Transformers on full LOB + trade + order events, 20+ years across equities/futures/crypto, ~100&nbsp;TB ≈ "trillions of tokens"; reports LLM-style scaling laws. Not open, but the clearest statement of the thesis.<br><a class="paper" href="https://slideslive.com/39043823/foundation-models-for-automated-trading" target="_blank">SlidesLive talk</a> · <a href="https://www.ai-street.co/p/hrt-trains-ai-models-on-trading-data" target="_blank">AI Street writeup</a></td></tr>
+      <tr><td class="name">TradeFM <em>(Kawawa-Beaudan et al., JPMorgan, ICLR 2026)</em></td><td>The open analog: a 524M-param decoder-only generative transformer on billions of trade events across 9,000+ equities, with a scale-invariant universal tokenizer; rollouts reproduce stylized facts and generalize zero-shot to APAC markets. Under review — blueprint, not codebase. <a class="xref" href="roadmap.html#landscape">→ Roadmap</a><br><a class="paper" href="https://openreview.net/forum?id=ODdcZz7VnY" target="_blank">OpenReview:ODdcZz7VnY</a> · <a class="paper" href="https://huggingface.co/papers/2602.23784" target="_blank">arXiv:2602.23784</a></td></tr>
+      <tr><td class="name">LOBS5 <em>(Nagy et al., 2023)</em></td><td><strong>The reproducible cornerstone.</strong> First end-to-end autoregressive generative model of tokenized LOB messages, using S5 (structured state-space) layers; ~6.3M params; digit-level tokenizer on LOBSTER data; decoded by JAX-LOB.<br><a class="repo" href="https://github.com/peernagy/LOBS5" target="_blank">peernagy/LOBS5</a> · <a class="paper" href="https://arxiv.org/abs/2309.00638" target="_blank">arXiv:2309.00638</a></td></tr>
+      <tr><td class="name">JAX-LOB <em>(Frey et al., 2023)</em></td><td>GPU-accelerated LOB matching-engine simulator — processes thousands of books in parallel, ~75x faster per message. The deterministic engine that decodes generated messages and powers RL.<br><a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">KangOxford/jax-lob</a> · <a class="paper" href="https://arxiv.org/abs/2308.13289" target="_blank">arXiv:2308.13289</a></td></tr>
+      <tr><td class="name">LOB-Bench <em>(2025)</em></td><td>Benchmark for generative LOB models — distributional fidelity via Wasserstein distance on interarrival times, order depths, book imbalance, spreads, returns. The honest eval target. <a class="xref" href="roadmap.html#phase5">→ Roadmap: Phase 5</a><br><a class="paper" href="https://arxiv.org/abs/2502.09172" target="_blank">arXiv:2502.09172</a></td></tr>
+      <tr><td class="name">TradeFM-class event tokenizers</td><td>Two competing tokenization philosophies to ablate: digit-level (LOBS5) vs feature-binning (TradeFM, e.g. <code>[liquidity, participant, Δprice-bin, trade-bin]</code>). This choice dominates results. <a class="xref" href="roadmap.html#phase3">→ Roadmap: Phase 3</a></td></tr>
+      <tr><td class="name">LOBSTER</td><td>Standard academic limit-order-book message dataset (NASDAQ). The default training data for LOBS5.<br><a href="https://lobsterdata.com/" target="_blank">lobsterdata.com</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 9. TOOLS -->
+  <h2 id="tools"><span class="section-num">§ 09</span>Open-source tools &amp; libraries</h2>
+
+  <h4>Backtesting &amp; live trading</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/mementum/backtrader" target="_blank">Backtrader</a> — the most popular Python backtester.</li>
+    <li><a class="repo" href="https://github.com/polakowo/vectorbt" target="_blank">vectorbt</a> — vectorized fast backtesting.</li>
+    <li><a class="repo" href="https://github.com/kernc/backtesting.py" target="_blank">Backtesting.py</a> — lightweight, clean.</li>
+    <li><a class="repo" href="https://github.com/QuantConnect/Lean" target="_blank">QuantConnect Lean</a> — full algo platform (C#/Python).</li>
+    <li><a class="repo" href="https://github.com/stefan-jansen/zipline-reloaded" target="_blank">Zipline-reloaded</a> — community fork of Quantopian's Zipline.</li>
+    <li><a class="repo" href="https://github.com/nautechsystems/nautilus_trader" target="_blank">NautilusTrader</a> — high-performance, Rust core, Python API.</li>
+    <li><a class="repo" href="https://github.com/freqtrade/freqtrade" target="_blank">freqtrade</a> — crypto-focused, very active community.</li>
+    <li><a class="repo" href="https://github.com/hummingbot/hummingbot" target="_blank">Hummingbot</a> — open-source crypto market-making.</li>
+    <li><a class="repo" href="https://github.com/vnpy/vnpy" target="_blank">vnpy</a> — large Chinese-market quant platform.</li>
+    <li><a class="repo" href="https://github.com/pmorissette/bt" target="_blank">bt</a> — flexible backtesting framework.</li>
+  </ul>
+
+  <h4>Order-book collection &amp; reconstruction (for §08 work)</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/ccxt/ccxt" target="_blank">ccxt</a> — unified API across 100+ crypto exchanges; breadth of L2 feeds.</li>
+    <li><a class="repo" href="https://github.com/bmoscon/cryptofeed" target="_blank">cryptofeed</a> — async websocket feed handler with full-depth L2/L3 order-book reconstruction. The fastest way to bank your own multi-TB event corpus for free.</li>
+    <li><a href="https://questdb.io/" target="_blank">QuestDB</a>, <a class="repo" href="https://github.com/man-group/arctic" target="_blank">Arctic</a> (Man Group) — high-performance stores for tick/message data.</li>
+    <li><a class="repo" href="https://github.com/pola-rs/polars" target="_blank">Polars</a> — Rust-based dataframes, ideal for billions of events.</li>
+  </ul>
+
+  <h4>Performance &amp; risk analysis</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/stefan-jansen/pyfolio-reloaded" target="_blank">pyfolio-reloaded</a> — portfolio performance &amp; risk.</li>
+    <li><a class="repo" href="https://github.com/stefan-jansen/alphalens-reloaded" target="_blank">alphalens-reloaded</a> — alpha factor research.</li>
+    <li><a class="repo" href="https://github.com/quantopian/empyrical" target="_blank">empyrical</a> — financial risk/return metrics.</li>
+    <li><a class="repo" href="https://github.com/ranaroussi/quantstats" target="_blank">quantstats</a> — beautiful portfolio analytics reports.</li>
+    <li><a class="repo" href="https://github.com/TA-Lib/ta-lib-python" target="_blank">TA-Lib</a> · <a class="repo" href="https://github.com/twopirllc/pandas-ta" target="_blank">pandas-ta</a> · <a class="repo" href="https://github.com/bukosabino/ta" target="_blank">ta</a> — technical indicators.</li>
+  </ul>
+
+  <h4>Portfolio optimization</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/dcajasn/Riskfolio-Lib" target="_blank">riskfolio-lib</a> — comprehensive portfolio optimization.</li>
+    <li><a class="repo" href="https://github.com/robertmartin8/PyPortfolioOpt" target="_blank">PyPortfolioOpt</a> — Markowitz, Black-Litterman, HRP, etc.</li>
+    <li><a class="repo" href="https://github.com/skfolio/skfolio" target="_blank">skfolio</a> — sklearn-style portfolio optimization.</li>
+    <li><a class="repo" href="https://github.com/cvxpy/cvxpy" target="_blank">cvxpy</a> — convex optimization for trading constraints.</li>
+    <li><a class="repo" href="https://github.com/coin-or/pulp" target="_blank">PuLP</a> — linear programming.</li>
+  </ul>
+
+  <h4>Derivatives, stochastic models, Bayesian</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/lballabio/QuantLib" target="_blank">QuantLib</a> — the canonical C++/Python derivatives library.</li>
+    <li><a class="repo" href="https://github.com/pymc-devs/pymc" target="_blank">PyMC</a>, <a class="repo" href="https://github.com/pyro-ppl/numpyro" target="_blank">NumPyro</a> — probabilistic programming.</li>
+    <li><a class="repo" href="https://github.com/statsmodels/statsmodels" target="_blank">statsmodels</a>, <a class="repo" href="https://github.com/bashtage/arch" target="_blank">arch</a> — econometric and GARCH-family models.</li>
+    <li><a class="repo" href="https://github.com/hudson-and-thames/mlfinlab" target="_blank">mlfinlab</a> — implements many López de Prado techniques.</li>
+  </ul>
+
+  <h4>Data</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/ranaroussi/yfinance" target="_blank">yfinance</a>, <a class="repo" href="https://github.com/pydata/pandas-datareader" target="_blank">pandas-datareader</a>, <a class="repo" href="https://github.com/polygon-io/client-python" target="_blank">polygon-api-client</a>, <a class="repo" href="https://github.com/alpacahq/alpaca-py" target="_blank">alpaca-py</a>, <a class="repo" href="https://github.com/ccxt/ccxt" target="_blank">ccxt</a> (crypto).</li>
+    <li><a href="https://databento.com/" target="_blank">databento</a>, <a href="https://data.nasdaq.com/" target="_blank">nasdaq-data-link</a> — paid quality (databento sells affordable full-depth MBO/MBP, the cheapest path to real equity LOB).</li>
+    <li><a class="repo" href="https://github.com/OpenBB-finance/OpenBB" target="_blank">OpenBB Terminal</a> — free Bloomberg alternative.</li>
+    <li><a class="repo" href="https://github.com/man-group/arctic" target="_blank">Arctic</a> (Man Group) — MongoDB-based high-performance time-series store.</li>
+    <li><a href="https://questdb.io/" target="_blank">QuestDB</a>, <a href="https://www.influxdata.com/" target="_blank">InfluxDB</a> — time-series databases used widely in quant shops.</li>
+  </ul>
+
+  <h4>Forecasting libraries</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/unit8co/darts" target="_blank">darts</a> — unified time-series API.</li>
+    <li><a class="repo" href="https://github.com/Nixtla/neuralforecast" target="_blank">neuralforecast</a> · <a class="repo" href="https://github.com/Nixtla/statsforecast" target="_blank">statsforecast</a> (Nixtla) — TSFM-friendly.</li>
+    <li><a class="repo" href="https://github.com/awslabs/gluonts" target="_blank">gluonts</a> (Amazon) — Chronos and other TSFMs.</li>
+    <li><a class="repo" href="https://github.com/sktime/sktime" target="_blank">sktime</a> — scikit-learn-style time series.</li>
+    <li><a class="repo" href="https://github.com/facebook/prophet" target="_blank">Prophet</a> — Meta's seasonality-aware forecaster.</li>
+    <li><a class="repo" href="https://github.com/tslearn-team/tslearn" target="_blank">tslearn</a> — DTW, clustering, classic time-series ML.</li>
+    <li><a class="repo" href="https://github.com/JoaquinAmatRodrigo/skforecast" target="_blank">skforecast</a> — sklearn-style forecasting.</li>
+  </ul>
+
+  <h4>ML / serving</h4>
+  <ul>
+    <li><a href="https://pytorch.org/" target="_blank">PyTorch</a>, <a class="repo" href="https://github.com/google/jax" target="_blank">JAX</a>, <a class="repo" href="https://github.com/Lightning-AI/pytorch-lightning" target="_blank">Lightning</a>, <a class="repo" href="https://github.com/huggingface/transformers" target="_blank">Hugging Face Transformers</a>.</li>
+    <li><a class="repo" href="https://github.com/vllm-project/vllm" target="_blank">vLLM</a> · <a class="repo" href="https://github.com/sgl-project/sglang" target="_blank">SGLang</a> for serving LLM-based trading agents.</li>
+    <li><a class="repo" href="https://github.com/state-spaces/s5" target="_blank">S5</a> — structured state-space layers; the backbone LOBS5 uses for long event sequences.</li>
+    <li><a class="repo" href="https://github.com/ray-project/ray" target="_blank">Ray</a> for distributed training and parallel backtesting.</li>
+    <li><a class="repo" href="https://github.com/pola-rs/polars" target="_blank">Polars</a> — fast Rust-based dataframes, ideal for tick data.</li>
+  </ul>
+
+  <h4>Awesome lists (the rabbit hole)</h4>
+  <ul>
+    <li><a class="repo" href="https://github.com/wilsonfreitas/awesome-quant" target="_blank">awesome-quant</a> — the biggest curated quant library list.</li>
+    <li><a class="repo" href="https://github.com/firmai/financial-machine-learning" target="_blank">financial-machine-learning</a> — curated ML for finance resources.</li>
+    <li><a class="repo" href="https://github.com/MaxBenChrist/awesome_time_series_in_python" target="_blank">awesome_time_series_in_python</a> — time-series-specific tools.</li>
+    <li><a class="repo" href="https://github.com/EvilPsyCHo/Deep-Time-Series-Prediction" target="_blank">Deep-Time-Series-Prediction</a> — implementations of all the major time-series DL models.</li>
+  </ul>
+
+  <!-- 10. DATASETS -->
+  <h2 id="datasets"><span class="section-num">§ 10</span>Datasets &amp; benchmarks</h2>
+
+  <h4>Datasets</h4>
+  <table>
+    <thead><tr><th>Dataset</th><th>Purpose &amp; link</th></tr></thead>
+    <tbody>
+      <tr><td class="name">FNSPID</td><td>29.7M stock prices + 15.7M news articles (S&amp;P 500, 1999–2023).<br><a class="repo" href="https://huggingface.co/datasets/Zihan1004/FNSPID" target="_blank">huggingface.co/Zihan1004/FNSPID</a></td></tr>
+      <tr><td class="name">LOTSA</td><td>Moirai's 27-billion-observation time-series corpus.<br><a class="repo" href="https://huggingface.co/datasets/Salesforce/lotsa_data" target="_blank">huggingface.co/Salesforce/lotsa_data</a></td></tr>
+      <tr><td class="name">FI-2010</td><td>The standard benchmark LOB dataset for mid-price direction. Where every §08 supervised model is first validated. <a class="xref" href="roadmap.html#phase1">→ Roadmap: Phase 1</a></td></tr>
+      <tr><td class="name">LOBSTER</td><td>Message-level NASDAQ limit-order-book data — the default for generative LOB models.<br><a href="https://lobsterdata.com/" target="_blank">lobsterdata.com</a></td></tr>
+      <tr><td class="name">FinRL-Meta</td><td>Gym-style market environments.<br><a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL-Meta" target="_blank">AI4Finance-Foundation/FinRL-Meta</a></td></tr>
+      <tr><td class="name">SEC EDGAR</td><td>All US public-company filings (10-K, 10-Q, 8-K, etc.).<br><a href="https://www.sec.gov/edgar/searchedgar/companysearch" target="_blank">sec.gov/edgar</a></td></tr>
+      <tr><td class="name">FRED</td><td>Federal Reserve Economic Data — macro indicators.<br><a href="https://fred.stlouisfed.org/" target="_blank">fred.stlouisfed.org</a></td></tr>
+      <tr><td class="name">CRSP, Compustat</td><td>Academic gold standard (paid). Access via <a href="https://wrds-www.wharton.upenn.edu/" target="_blank">WRDS at Wharton</a>.</td></tr>
+      <tr><td class="name">Refinitiv / LSEG</td><td>Industry-standard market data (paid).</td></tr>
+      <tr><td class="name">Numerai datasets</td><td>Obfuscated quant features released weekly to a tournament.<br><a href="https://numer.ai/" target="_blank">numer.ai</a></td></tr>
+    </tbody>
+  </table>
+
+  <h4>Benchmarks</h4>
+  <table>
+    <thead><tr><th>Benchmark</th><th>Purpose &amp; link</th></tr></thead>
+    <tbody>
+      <tr><td class="name">LOB-Bench</td><td>Distributional-fidelity benchmark for generative order-flow models. The right scoreboard for §08 generative work.<br><a class="paper" href="https://arxiv.org/abs/2502.09172" target="_blank">arXiv:2502.09172</a></td></tr>
+      <tr><td class="name">GIFT-Eval</td><td>TSFM evaluation benchmark — tries to fix contamination.<br><a class="repo" href="https://huggingface.co/spaces/Salesforce/GIFT-Eval" target="_blank">huggingface.co/Salesforce/GIFT-Eval</a></td></tr>
+      <tr><td class="name">Open FinLLM Leaderboard</td><td>Standard finance LLM benchmark on Hugging Face.<br><a class="repo" href="https://huggingface.co/spaces/TheFinAI/Open-FinLLM-Leaderboard" target="_blank">huggingface.co/TheFinAI/Open-FinLLM-Leaderboard</a></td></tr>
+      <tr><td class="name">FLARE</td><td>Finance Language understanding eval (part of PIXIU).<br><a class="repo" href="https://github.com/The-FinAI/PIXIU" target="_blank">The-FinAI/PIXIU</a></td></tr>
+      <tr><td class="name">FinBen</td><td>Holistic benchmark for finance LLMs.<br><a class="paper" href="https://arxiv.org/abs/2402.12659" target="_blank">arXiv:2402.12659</a></td></tr>
+      <tr><td class="name">FinanceBench</td><td>Patronus AI benchmark on financial question answering.<br><a class="paper" href="https://arxiv.org/abs/2311.11944" target="_blank">arXiv:2311.11944</a></td></tr>
+      <tr><td class="name">FinQA / ConvFinQA / TAT-QA</td><td>Numerical and conversational finance QA benchmarks.<br><a class="paper" href="https://arxiv.org/abs/2109.00122" target="_blank">FinQA</a> · <a class="paper" href="https://arxiv.org/abs/2210.03849" target="_blank">ConvFinQA</a> · <a class="paper" href="https://arxiv.org/abs/2105.07624" target="_blank">TAT-QA</a></td></tr>
+      <tr><td class="name">INVESTORBENCH</td><td>Benchmark for LLM-based investing agents.<br><a class="paper" href="https://arxiv.org/abs/2412.18174" target="_blank">arXiv:2412.18174</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 11. OPEN LABS -->
+  <h2 id="labs-open"><span class="section-num">§ 11</span>Open-source labs &amp; research groups</h2>
+  <ul>
+    <li><strong><a class="repo" href="https://github.com/AI4Finance-Foundation" target="_blank">AI4Finance Foundation</a></strong> — FinGPT, FinRL, FinRobot, FinNLP. The biggest open ecosystem.</li>
+    <li><strong><a class="repo" href="https://github.com/TauricResearch" target="_blank">Tauric Research</a></strong> — TradingAgents, Trading-R1.</li>
+    <li><strong><a class="repo" href="https://github.com/Open-Finance-Lab" target="_blank">Open-Finance-Lab</a></strong> — FinAI Contest, FinAgent.</li>
+    <li><strong><a class="repo" href="https://github.com/The-FinAI" target="_blank">The FinAI</a></strong> — Open FinLLM Leaderboard, FLARE, PIXIU.</li>
+    <li><strong>Oxford-Man Institute / Foerster Lab (FLAIR), Oxford</strong> — <a class="repo" href="https://github.com/peernagy/LOBS5" target="_blank">LOBS5</a>, <a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">JAX-LOB</a>, <a class="repo" href="https://github.com/KangOxford/AlphaTrade" target="_blank">AlphaTrade</a>, LOB-Bench. The home of the open event-stream stack and Stefan Zohren's microstructure work.</li>
+    <li><strong>JPMorgan AI Research</strong> — TradeFM, LLM equity-rating research (Veloso, Papasotiriou, Sood, Borrajo).</li>
+    <li><strong><a class="repo" href="https://github.com/thuml" target="_blank">THUML (Tsinghua)</a></strong> — Kronos, Sundial, Timer-XL, Informer, Autoformer, iTransformer.</li>
+    <li><strong><a class="repo" href="https://github.com/SalesforceAIResearch" target="_blank">Salesforce AI Research</a></strong> — Moirai, Uni2TS, GIFT-Eval.</li>
+    <li><strong><a class="repo" href="https://github.com/amazon-science" target="_blank">Amazon Science</a></strong> — Chronos, GluonTS.</li>
+    <li><strong><a class="repo" href="https://github.com/google-research" target="_blank">Google Research</a></strong> — TimesFM.</li>
+    <li><strong><a class="repo" href="https://github.com/ServiceNow" target="_blank">ServiceNow Research</a></strong> + <a href="https://mila.quebec/" target="_blank">Mila</a> — Lag-Llama.</li>
+    <li><strong><a class="repo" href="https://github.com/ibm-granite" target="_blank">IBM Granite</a></strong> — Granite TTM.</li>
+    <li><strong><a href="https://www.cmu.edu/" target="_blank">CMU</a></strong> — MOMENT.</li>
+    <li><strong><a class="repo" href="https://github.com/Nixtla" target="_blank">Nixtla</a></strong> — TimeGPT, neuralforecast.</li>
+    <li><strong><a class="repo" href="https://github.com/FudanDISC" target="_blank">FudanDISC</a></strong> — DISC-FinLLM.</li>
+    <li><strong><a class="repo" href="https://github.com/hudson-and-thames" target="_blank">Hudson &amp; Thames</a></strong> — mlfinlab (implements López de Prado).</li>
+  </ul>
+
+  <!-- 12. PRIVATE -->
+  <h2 id="labs-private"><span class="section-num">§ 12</span>Private &amp; industry labs</h2>
+
+  <h4>Banks &amp; sell-side AI groups</h4>
+  <ul>
+    <li><strong><a href="https://www.bloomberg.com/company/" target="_blank">Bloomberg LP</a></strong> — BloombergGPT, sentiment systems.</li>
+    <li><strong><a href="https://www.jpmorgan.com/technology/artificial-intelligence" target="_blank">J.P. Morgan AI Research</a></strong> — derivatives pricing, NLP on filings, the LLM equity-rating paper, and now TradeFM — the most public bank effort on event-stream foundation models.</li>
+    <li><strong><a href="https://www.goldmansachs.com/what-we-do/engineering/" target="_blank">Goldman Sachs Engineering</a></strong> — Marquee, AI-powered execution.</li>
+    <li><strong><a href="https://www.morganstanley.com/" target="_blank">Morgan Stanley</a></strong> — Next Best Action AI advisor.</li>
+    <li><strong><a href="https://www.blackrock.com/aladdin" target="_blank">BlackRock</a></strong> — Aladdin platform; very large AI investment.</li>
+    <li><strong><a href="https://www.man.com/maninstitute" target="_blank">Man Institute</a></strong> (Man Group) — heavy systematic + ML research, also publishes openly.</li>
+  </ul>
+
+  <h4>Quant funds (systematic, ML-heavy)</h4>
+  <ul>
+    <li><strong><a href="https://www.rentec.com/" target="_blank">Renaissance Technologies</a></strong> — Medallion Fund. Reportedly integrates deep learning to predict factor effectiveness.</li>
+    <li><strong><a href="https://www.twosigma.com/" target="_blank">Two Sigma</a></strong> — news, satellite imagery, and financial reports into ML models. Over $58B AUM.</li>
+    <li><strong><a href="https://www.deshaw.com/" target="_blank">D.E. Shaw</a></strong> — NLP on earnings transcripts, alternative data.</li>
+    <li><strong><a href="https://www.man.com/" target="_blank">Man AHL / Man Numeric</a></strong> — pioneer systematic shop, deeply ML-integrated.</li>
+    <li><strong><a href="https://www.mwam.com/" target="_blank">Marshall Wace</a></strong> — TOPS system, very ML-heavy alpha aggregation.</li>
+    <li><strong><a href="https://www.voleon.com/" target="_blank">Voleon Group</a></strong> — founded by ex-D.E. Shaw, pure ML focus.</li>
+    <li><strong><a href="https://www.pdtpartners.com/" target="_blank">PDT Partners</a>, <a href="https://www.point72.com/cubist-systematic-strategies/" target="_blank">Cubist (Point72)</a>, <a href="https://www.aqr.com/" target="_blank">AQR</a>, <a href="https://www.worldquant.com/" target="_blank">WorldQuant</a>.</strong></li>
+    <li><strong><a href="https://www.mlp.com/" target="_blank">Millennium</a>, <a href="https://www.bambusinvestments.com/" target="_blank">Balyasny</a>, <a href="https://exoduspoint.com/" target="_blank">ExodusPoint</a>, <a href="https://www.schonfeld.com/" target="_blank">Schonfeld</a></strong> — multi-manager "pod" shops, many ML-driven pods.</li>
+    <li><strong><a href="https://www.acadian-asset.com/" target="_blank">Acadian Asset Management</a></strong> — quantitative equity manager, big ML investment.</li>
+    <li><strong><a href="https://gsacapital.com/" target="_blank">GSA Capital</a>, <a href="https://www.quantica-capital.com/" target="_blank">Quantica Capital</a>, <a href="https://www.squarepoint-capital.com/" target="_blank">Squarepoint</a>.</strong></li>
+    <li><strong><a href="https://www.citadel.com/" target="_blank">Citadel</a> / <a href="https://www.citadelsecurities.com/" target="_blank">Citadel Securities</a></strong> — HFT and market-making with ML.</li>
+  </ul>
+
+  <h4>HFT &amp; market-makers</h4>
+  <ul>
+    <li><strong><a href="https://www.hudsonrivertrading.com/" target="_blank">Hudson River Trading (HRT)</a></strong> — the firm behind the "Foundation Models for Automated Trading" thesis (§08). Reported ~$12.3B net trading revenue in 2025; ~10% of US equity volume; runs its own state-of-the-art datacenter for transformer training on full market event streams.</li>
+    <li><strong><a href="https://www.janestreet.com/" target="_blank">Jane Street</a>, <a href="https://www.jumptrading.com/" target="_blank">Jump Trading</a>, <a href="https://www.tower-research.com/" target="_blank">Tower Research</a>, <a href="https://www.optiver.com/" target="_blank">Optiver</a>, <a href="https://www.imc.com/" target="_blank">IMC</a>, <a href="https://www.virtu.com/" target="_blank">Virtu</a></strong> — heavy ML for execution and pricing.</li>
+  </ul>
+
+  <h4>Crypto-native</h4>
+  <ul>
+    <li><strong><a href="https://numer.ai/" target="_blank">Numerai</a></strong> — open data-science tournament feeding a hedge fund.</li>
+    <li><strong><a href="https://jumpcrypto.com/" target="_blank">Jump Crypto</a>, <a href="https://www.wintermute.com/" target="_blank">Wintermute</a>, <a href="https://www.gsr.io/" target="_blank">GSR</a>.</strong></li>
+  </ul>
+
+  <h4>Retail platforms doing AI</h4>
+  <ul>
+    <li><strong><a href="https://alpaca.markets/" target="_blank">Alpaca</a>, <a href="https://www.quantconnect.com/" target="_blank">QuantConnect</a>, <a href="https://www.composer.trade/" target="_blank">Composer</a>, <a href="https://www.trade-ideas.com/" target="_blank">Trade Ideas</a>.</strong></li>
+  </ul>
+
+  <!-- 13. CONFERENCES -->
+  <h2 id="conferences"><span class="section-num">§ 13</span>Conferences &amp; venues</h2>
+  <p>Where the best work lands first.</p>
+  <ul>
+    <li><strong><a href="https://ai-finance.org/" target="_blank">ICAIF</a></strong> — ACM International Conference on AI in Finance. The dedicated venue (JAX-LOB and LOBS5 landed here).</li>
+    <li><strong><a href="https://neurips.cc/" target="_blank">NeurIPS</a>, <a href="https://icml.cc/" target="_blank">ICML</a>, <a href="https://iclr.cc/" target="_blank">ICLR</a></strong> — major ML conferences; HRT's talk was an ICML 2025 Expo session, TradeFM is under review at ICLR 2026.</li>
+    <li><strong><a href="https://www.kdd.org/" target="_blank">KDD</a></strong> — strong finance applied track.</li>
+    <li><strong><a href="https://aaai.org/" target="_blank">AAAI</a></strong> — Kronos appeared here.</li>
+    <li><strong>FinNLP Workshop</strong> — at ACL/EMNLP, focused on NLP in finance.</li>
+    <li><strong><a href="https://www.informs.org/" target="_blank">INFORMS</a></strong> — operations research conference with strong financial track.</li>
+    <li><strong><a href="https://sigir.org/" target="_blank">SIGIR</a></strong> — for retrieval-augmented finance work.</li>
+    <li><strong>TSALM @ ICLR</strong> — Time Series for the Age of Large Models workshop.</li>
+  </ul>
+
+  <!-- 14. BOOKS -->
+  <h2 id="books"><span class="section-num">§ 14</span>Books &amp; courses</h2>
+
+  <h4>Essential books</h4>
+  <ul>
+    <li><a href="https://www.wiley.com/en-us/Advances+in+Financial+Machine+Learning-p-9781119482086" target="_blank"><em>Advances in Financial Machine Learning</em></a> — Marcos López de Prado. Still the best intro.</li>
+    <li><a href="https://www.cambridge.org/core/elements/abs/machine-learning-for-asset-managers/" target="_blank"><em>Machine Learning for Asset Managers</em></a> — López de Prado. Short, focused.</li>
+    <li><a class="repo" href="https://github.com/stefan-jansen/machine-learning-for-trading" target="_blank"><em>Machine Learning for Algorithmic Trading</em></a> — Stefan Jansen. Companion code is gold.</li>
+    <li><a href="https://www.epchan.com/books.html" target="_blank"><em>Algorithmic Trading</em> &amp; <em>Quantitative Trading</em></a> — Ernest Chan. Practical, retail-friendly.</li>
+    <li><a href="https://www.wiley.com/en-us/Inside+the+Black+Box%3A+A+Simple+Guide+to+Quantitative+and+High+Frequency+Trading-p-9781118362419" target="_blank"><em>Inside the Black Box</em></a> — Rishi Narang. Best non-technical overview of quant trading.</li>
+    <li><a href="https://www.amazon.com/Man-Who-Solved-Market-Revolution/dp/0735217983" target="_blank"><em>The Man Who Solved the Market</em></a> — Gregory Zuckerman. The Renaissance Technologies story.</li>
+    <li><em>Options, Futures, and Other Derivatives</em> — John Hull. The classical derivatives reference.</li>
+    <li><em>Trading and Exchanges</em> — Larry Harris. The market-microstructure bible — essential before any §08 work.</li>
+    <li><em>Active Portfolio Management</em> — Grinold &amp; Kahn.</li>
+    <li><em>Asset Pricing</em> — John Cochrane. The academic side.</li>
+    <li><em>Quantitative Equity Portfolio Management</em> — Chincarini &amp; Kim.</li>
+  </ul>
+
+  <h4>Free courses &amp; lectures</h4>
+  <ul>
+    <li><a href="https://www.coursera.org/specializations/machine-learning-trading" target="_blank">Coursera — ML for Trading specialization</a> (Georgia Tech).</li>
+    <li><a href="https://ocw.mit.edu/courses/15-450-analytics-of-finance-fall-2010/" target="_blank">MIT OCW 15.450 — Analytics of Finance</a>.</li>
+    <li><a href="https://www.youtube.com/@QuantPy" target="_blank">QuantPy YouTube</a>, <a href="https://www.youtube.com/@DimitriBianco" target="_blank">Dimitri Bianco</a>, Quantopian's archived lectures.</li>
+    <li><a href="https://stanford-cs329s.github.io/" target="_blank">Stanford CS329S</a> — ML systems design (applicable to deploying trading models).</li>
+    <li><a href="https://github.com/firmai/financial-machine-learning" target="_blank">firmai/financial-machine-learning</a> — curated free resources list.</li>
+  </ul>
+
+  <!-- 15. MILESTONES -->
+  <h2 id="milestones"><span class="section-num">§ 15</span>Major achievements — a timeline</h2>
+  <p>Red nodes are the broad field; <span style="color:var(--teal);font-weight:600;">teal nodes</span> trace the event-stream microstructure lineage that the Roadmap builds on.</p>
+
+  <ul class="timeline">
+    <li><span class="year">2017</span><a class="paper" href="https://arxiv.org/abs/1706.03762" target="_blank">Transformer paper</a> (Vaswani et al.). Everything downstream depends on this.</li>
+    <li class="hrt"><span class="year">2018</span><a class="paper" href="https://arxiv.org/abs/1808.03668" target="_blank">DeepLOB</a> — CNN-LSTM for limit-order books, the first major DL breakthrough in microstructure.</li>
+    <li><span class="year">2019</span><a class="paper" href="https://arxiv.org/abs/1908.10063" target="_blank">FinBERT</a>: domain-tuned BERT for financial sentiment, the de facto baseline for years.</li>
+    <li><span class="year">2020</span><a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL" target="_blank">FinRL</a> launched — first major open-source RL framework for finance.</li>
+    <li><span class="year">2021–2022</span><a class="paper" href="https://arxiv.org/abs/2012.07436" target="_blank">Informer</a>, <a class="paper" href="https://arxiv.org/abs/2106.13008" target="_blank">Autoformer</a>, <a class="paper" href="https://arxiv.org/abs/2211.14730" target="_blank">PatchTST</a> — the time-series transformer wave that made TSFMs possible.</li>
+    <li><span class="year">March 2023</span><a class="paper" href="https://arxiv.org/abs/2303.17564" target="_blank">BloombergGPT</a> released — first frontier-scale finance LLM.</li>
+    <li><span class="year">April 2023</span><a class="paper" href="https://arxiv.org/abs/2304.07619" target="_blank">Lopez-Lira &amp; Tang</a> — the "Can ChatGPT predict stock returns?" paper that sparked the trading-LLM wave.</li>
+    <li><span class="year">June 2023</span><a class="paper" href="https://arxiv.org/abs/2306.06031" target="_blank">FinGPT</a> released — open-source via LoRA, dropping fine-tuning cost from ~$5M to under $300.</li>
+    <li class="hrt"><span class="year">Aug–Sep 2023</span><a class="paper" href="https://arxiv.org/abs/2308.13289" target="_blank">JAX-LOB</a> + <a class="paper" href="https://arxiv.org/abs/2309.00638" target="_blank">LOBS5</a> (Oxford) — a GPU LOB simulator and the first end-to-end generative model of tokenized order-book messages. The open event-stream stack is born.</li>
+    <li><span class="year">Late 2023</span><a class="paper" href="https://arxiv.org/abs/2311.13743" target="_blank">FinMem</a> introduces layered memory for LLM trading agents.</li>
+    <li><span class="year">Feb 2024</span><a class="paper" href="https://arxiv.org/abs/2402.18485" target="_blank">FinAgent</a> — first major multimodal foundation agent for trading.</li>
+    <li><span class="year">March 2024</span><a class="paper" href="https://arxiv.org/abs/2403.07815" target="_blank">Chronos</a> by Amazon — time-series tokenization breakthrough.</li>
+    <li><span class="year">May 2024</span><a class="paper" href="https://arxiv.org/abs/2310.10688" target="_blank">TimesFM</a> by Google — patched-decoder TSFM trained on Google production data.</li>
+    <li><span class="year">August 2024</span><a class="paper" href="https://arxiv.org/abs/2402.02592" target="_blank">Moirai</a> by Salesforce — any-variate attention solves the multivariate problem.</li>
+    <li><span class="year">December 2024</span><a class="paper" href="https://arxiv.org/abs/2412.20138" target="_blank">TradingAgents</a> released — multi-agent debate-based framework.</li>
+    <li class="hrt"><span class="year">Feb 2025</span><a class="paper" href="https://arxiv.org/abs/2502.09172" target="_blank">LOB-Bench</a> — the first proper distributional-fidelity benchmark for generative order-flow models.</li>
+    <li class="hrt"><span class="year">July 2025</span><a class="paper" href="https://slideslive.com/39043823/foundation-models-for-automated-trading" target="_blank">HRT at ICML 2025</a> — Marc Khoury's "Foundation Models for Automated Trading" names the paradigm publicly: ~100&nbsp;TB ≈ trillions of tokens, LLM-style scaling laws on market data.</li>
+    <li><span class="year">2025</span><a class="paper" href="https://arxiv.org/abs/2508.02739" target="_blank">Kronos</a> (Tsinghua) — finance-domain TSFM. RankIC +93%.</li>
+    <li class="hrt"><span class="year">Jan 2026</span>HRT reports a record ~$12.3B net trading revenue for 2025; <a href="https://www.ai-street.co/p/hrt-trains-ai-models-on-trading-data" target="_blank">AI Street</a> details the foundation-model effort.</li>
+    <li class="hrt"><span class="year">ICLR 2026</span><a class="paper" href="https://openreview.net/forum?id=ODdcZz7VnY" target="_blank">TradeFM</a> (JPMorgan) — 524M-param generative trade-flow foundation model; the open blueprint for everything in the Roadmap.</li>
+  </ul>
+
+  <!-- 16. PATH -->
+  <h2 id="path"><span class="section-num">§ 16</span>A suggested learning path</h2>
+  <p>For the general field, the path below. For the specific build — event-stream microstructure models the HRT/TradeFM way — follow the <a class="xref" href="roadmap.html">companion Roadmap</a> instead, which turns this into a phased implementation plan.</p>
+
+  <ol class="path-list">
+    <li><strong>Foundations.</strong> Read <a href="https://www.wiley.com/en-us/Advances+in+Financial+Machine+Learning-p-9781119482086" target="_blank"><em>Advances in Financial Machine Learning</em></a> (López de Prado), then <a class="repo" href="https://github.com/stefan-jansen/machine-learning-for-trading" target="_blank">Machine Learning for Algorithmic Trading</a> (Jansen) for working code. Add <em>Inside the Black Box</em> (Narang) for cultural context.</li>
+    <li><strong>Survey the field.</strong> Skim the <a class="paper" href="https://arxiv.org/abs/2402.02315" target="_blank">FinLLMs survey</a>, the <a class="paper" href="https://arxiv.org/abs/2408.06361" target="_blank">LLM-Agent-in-Trading survey</a>, and the <a class="paper" href="https://arxiv.org/abs/2405.02358" target="_blank">TSFM survey</a>. These will save you months of arbitrary paper-hopping.</li>
+    <li><strong>Get hands dirty.</strong> Clone <a class="repo" href="https://github.com/AI4Finance-Foundation/FinRL" target="_blank">FinRL</a>, run the examples. Then <a class="repo" href="https://github.com/TauricResearch/TradingAgents" target="_blank">TradingAgents</a> to feel the agent paradigm.</li>
+    <li><strong>Forecasting.</strong> Try <a class="repo" href="https://github.com/amazon-science/chronos-forecasting" target="_blank">Chronos</a> and <a class="repo" href="https://github.com/google-research/timesfm" target="_blank">TimesFM</a> via <a class="repo" href="https://github.com/awslabs/gluonts" target="_blank">gluonts</a> on real stock data. Compare against ARIMA, Prophet, and DLinear baselines — you will be humbled.</li>
+    <li><strong>Microstructure.</strong> Read DeepLOB and TLOB, then clone <a class="repo" href="https://github.com/peernagy/LOBS5" target="_blank">LOBS5</a> and <a class="repo" href="https://github.com/KangOxford/jax-lob" target="_blank">JAX-LOB</a>. This is the on-ramp to the Roadmap.</li>
+    <li><strong>Backtesting discipline.</strong> Learn <a class="repo" href="https://github.com/polakowo/vectorbt" target="_blank">vectorbt</a> or <a class="repo" href="https://github.com/nautechsystems/nautilus_trader" target="_blank">NautilusTrader</a>; read López de Prado on cross-validation for finance and the <a class="paper" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551" target="_blank">deflated Sharpe ratio</a>.</li>
+    <li><strong>Validate ruthlessly.</strong> Walk-forward analysis, transaction-cost modeling, regime testing, combinatorial purged CV. Skip this and you are curve-fitting.</li>
+  </ol>
+
+  <div class="ornament">✦ ✦ ✦</div>
+
+  <div class="callout">
+    <strong>An honest caveat</strong>
+    The published papers and open-source repos showing "X% returns" almost always have problems — lookahead bias, survivorship bias, no transaction costs, benchmark contamination. The frameworks are excellent for learning and as research scaffolds. None are turnkey money machines. The firms that make money keep their actual models private. This is a technical landscape, not investment advice, and "the model said so" remains the worst reason to trade.
+  </div>
+
+  <footer>
+    <span>Foundation Models / Automated Trading</span>
+    <span>Expanded Edition · June 2026 · maps to roadmap.html</span>
+    <span>For study, not advice</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
